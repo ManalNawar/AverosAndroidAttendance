@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "132688613999",
+    "project_id": "averos-positioning",
+    "storage_bucket": "averos-positioning.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132688613999:android:10f34b817f48ca29b6339a",
+        "android_client_info": {
+          "package_name": "com.averos.als.positioningdemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "132688613999-tbd4e9nhisgu1oist25qokr0jad9at96.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMwhAI70oCIxADlYmHSz8WYiC7bZiZjUM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "132688613999-tbd4e9nhisgu1oist25qokr0jad9at96.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

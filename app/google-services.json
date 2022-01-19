@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "700583113183",
+    "project_id": "avirosandroidattendace",
+    "storage_bucket": "avirosandroidattendace.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:700583113183:android:d3ce250cc8e121f5c4546a",
+        "android_client_info": {
+          "package_name": "com.averos.als.attendance"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "700583113183-o1qdmvdra2d2jgt7eddhk4oif8llc61t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBh6LEWoO3B0KJ6MjIo3_DUd__mrCKCuA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "700583113183-o1qdmvdra2d2jgt7eddhk4oif8llc61t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

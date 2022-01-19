@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="Gradle: com.loopj.android:android-async-http:1.4.11@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/31a78ae21404a0685db3a3a976049710/jetified-android-async-http-1.4.11/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/4ca3ee331bb2436f9eb80836912b611d/jetified-android-async-http-1.4.11/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e4bed6e45c346fbca51a6a9073d7593b/jetified-android-async-http-1.4.11/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e4bed6e45c346fbca51a6a9073d7593b/jetified-android-async-http-1.4.11/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e4bed6e45c346fbca51a6a9073d7593b/jetified-android-async-http-1.4.11/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.loopj.android/android-async-http/1.4.11/6d18a084f407f9bd5bfe4e43a9b7244b7117cac4/android-async-http-1.4.11-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.loopj.android/android-async-http/1.4.11/8455d7c8590eb568420cfbf852e3e738426238b7/android-async-http-1.4.11-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
