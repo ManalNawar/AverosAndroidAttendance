@@ -1,13 +1,18 @@
 package com.averos.als.positioningdemo;
-
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -15,7 +20,85 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.microsoft.identity.client.AuthenticationCallback;
+import com.microsoft.identity.client.AuthenticationResult;
+import com.microsoft.identity.client.MsalClientException;
+import com.microsoft.identity.client.MsalException;
+import com.microsoft.identity.client.MsalServiceException;
+import com.microsoft.identity.client.MsalUiRequiredException;
+import com.microsoft.identity.client.PublicClientApplication;
+import com.microsoft.identity.client.User;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.Build;
+import android.util.Log;
+
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.averos.als.positioning.ALSManager;
+import com.averos.als.positioning.ble.DebugListener;
+import com.averos.als.positioning.ble.model.BeaconNode;
+import com.averos.als.positioning.location.ALSPositionListener;
+import com.averos.als.positioning.location.IndoorLocation;
+import com.averos.als.positioning.misc.ALSActivity;
+import com.averos.als.positioning.misc.ALSConstants;
+import com.averos.als.positioning.misc.ALSUtils;
+import com.averos.als.positioning.models.Beacons;
+import com.averos.als.positioning.models.Buildings;
+import com.averos.als.positioning.models.FloorRegion;
+import com.averos.als.positioningdemo.callback.ServerCallback;
+//import com.averos.als.positioningdemo.databinding.ActivityMainBinding;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
@@ -25,14 +108,28 @@ import com.microsoft.identity.client.MsalUiRequiredException;
 import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.User;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.message.BasicHeader;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -41,6 +138,8 @@ public class LoginActivity extends AppCompatActivity {
     final static String SCOPES [] = {"https://graph.microsoft.com/User.Read"};
     final static String MSGRAPH_URL = "https://graph.microsoft.com/v1.0/me";
 
+
+
     /* UI & Debugging Variables */
     private static final String TAG = LoginActivity.class.getSimpleName();
     Button callGraphButton;
@@ -48,20 +147,55 @@ public class LoginActivity extends AppCompatActivity {
     Button attendenceLog;
 
     /* Azure AD Variables */
-    private PublicClientApplication sampleApp;
-    private AuthenticationResult authResult;
+    public static PublicClientApplication sampleApp;
+    public static AuthenticationResult authResult;
 
     public static String userID;
+    String userName;
+    BottomNavigationView nav_bottom;
+    ImageView img;
+
+    List<User> users;
+    Intent myIntent;
+    Users user;
+    //Toolbar toolbar;
+    //LinearLayout beaconsUI;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
 
+        //check if user is loggedin
+        if (SharedPrefManager.getInstance(this).isLoggedIn()) {
+            finish();
+            startActivity(new Intent(this, MainActivity.class));
+            Log.d(TAG, "user user is loggedin => : ");
+
+        }
+
+
+        ////////////////////////////tool bar ////////////////////////////////////
+       // toolbar = findViewById(R.id.main_toolbar);
+        //beaconsUI = findViewById(R.id.beaconsUI);
+        // providing title for the ActionBar
+       // toolbar.setVisibility(View.INVISIBLE);
+       // beaconsUI.setVisibility(View.INVISIBLE);
+
+
+
         callGraphButton = (Button) findViewById(R.id.callGraph);
         signOutButton = (Button) findViewById(R.id.clearCache);
         attendenceLog = (Button) findViewById(R.id.submitattendance);
+       // nav_bottom = findViewById(R.id.bottomNavigationView);
+        img = findViewById(R.id.icon);
+        //Intent myIntent = new Intent(this, MainActivity.class);
         Intent myIntent = new Intent(this, MainActivity.class);
+       // myIntent.putExtra("authResult", authResult.getUser().getName());
+
+
+
         callGraphButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 onCallGraphClicked();
@@ -76,6 +210,10 @@ public class LoginActivity extends AppCompatActivity {
 
         attendenceLog.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                ///////////////passing data to main activity//////////////////////
+                myIntent.putExtra("authResult", authResult.getUser().getName());
+                Log.d(TAG, "sampleApp contain this => : " + sampleApp);
+                myIntent.putExtra("sampleApp", String.valueOf(sampleApp));
                 startActivity(myIntent);
             }
         });
@@ -91,7 +229,7 @@ public class LoginActivity extends AppCompatActivity {
         /* Attempt to get a user and acquireTokenSilent
          * If this fails we do an interactive request
          */
-        List<User> users = null;
+        //List<User> users = null;
 
         try {
             users = sampleApp.getUsers();
@@ -113,7 +251,52 @@ public class LoginActivity extends AppCompatActivity {
             Log.d(TAG, "User at this position does not exist: " + e.toString());
         }
 
+        // status bar color
+        if (Build.VERSION.SDK_INT >= 21) {
+            Window window = this.getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(this.getResources().getColor(R.color.border_color));
+        }
+
+
+//// ...
+//
+//
+//// Instantiate the RequestQueue.
+//        RequestQueue queue = Volley.newRequestQueue(this);
+//        String url ="https://attend.itjed.com/api/token";
+//
+//// Request a string response from the provided URL.
+//        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        // Display the first 500 characters of the response string.
+//                        textView.setText("Response is: "+ response.substring(0,500));
+//                        Log.d(TAG, "Response is =======> " + authResult.getUser().getDisplayableId());
+//                        System.out.print("Response is =======> " + response);
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                textView.setText("That didn't work!");
+//            }
+//        }){
+//            protected Map<String, String> getparams(){
+//                Map<String,String> params = new HashMap<>();
+//                params.put("userEmail", authResult.getUser().getDisplayableId());
+//                params.put("apiAppKey", "3D3679B75DF6F1987AB688C3B4493A97B908FB3F454B36D93FCDDC2CEC34DE84");
+//                params.put("deviceID", "Attend's");
+//                return params;
+//            }
+//        };
+//
+//// Add the request to the RequestQueue.
+//        queue.add(stringRequest);
+
     }
+
 
 //
 // App callbacks for MSAL
@@ -122,6 +305,8 @@ public class LoginActivity extends AppCompatActivity {
 // getAuthSilentCallback() - callback defined to handle acquireTokenSilent() case
 // getAuthInteractiveCallback() - callback defined to handle acquireToken() case
 //
+
+
 
     public AppCompatActivity getActivity() {
         return this;
@@ -141,11 +326,26 @@ public class LoginActivity extends AppCompatActivity {
                 /* Store the authResult */
                 authResult = authenticationResult;
 
+
+
+//                Toast.makeText(getBaseContext(), "Signed Out!", Toast.LENGTH_SHORT)
+//                        .show();
+//                System.out.print(authResult);
+
                 /* call graph */
                 callGraphAPI();
+                //login("yaho@yaho.com");
 
                 /* update the UI to post call Graph state */
                 updateSuccessUI();
+
+                //login(authResult.getUser().getDisplayableId());
+
+                //startActivity(myIntent);
+               // startActivity(new Intent(getActivity(),MainActivity.class));
+
+
+
             }
 
             @Override
@@ -181,14 +381,25 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d(TAG, "Successfully authenticated");
                 Log.d(TAG, "ID Token: " + authenticationResult.getIdToken());
 
+
                 /* Store the auth result */
                 authResult = authenticationResult;
-
+                Log.d(TAG, "auth user information string is "+authResult.toString());
+                Log.d(TAG, "auth user name information name is "+ authResult.getUser().getName());
+                Log.d(TAG, "auth user email information id is "+ authResult.getUser().getDisplayableId());
                 /* call Graph */
                 callGraphAPI();
 
                 /* update the UI to post call Graph state */
+                //login("yaho@yaho.com");
                 updateSuccessUI();
+                //login(authResult.getUser().getDisplayableId());
+                //startActivity(myIntent);
+              //  startActivity(new Intent(getActivity(),MainActivity.class));
+
+
+
+
 
 
 
@@ -216,12 +427,28 @@ public class LoginActivity extends AppCompatActivity {
 
     /* Set the UI for successful token acquisition data */
     private void updateSuccessUI() {
+
+//        //check if user is loggedin
+//        if (SharedPrefManager.getInstance(this).isLoggedIn()) {
+//            finish();
+//            startActivity(new Intent(this, MainActivity.class));
+//            Log.d(TAG, "user user is loggedin => : ");
+//
+//        }
         callGraphButton.setVisibility(View.INVISIBLE);
         signOutButton.setVisibility(View.VISIBLE);
-       attendenceLog.setVisibility(View.VISIBLE);
+        attendenceLog.setVisibility(View.VISIBLE);
         findViewById(R.id.welcome).setVisibility(View.VISIBLE);
         ((TextView) findViewById(R.id.welcome)).setText("Welcome, " +
                 authResult.getUser().getName());
+        //nav_bottom.setVisibility(View.VISIBLE);
+        img.setVisibility(View.INVISIBLE);
+
+//        toolbar.setVisibility(View.VISIBLE);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setTitle("Home");
+//
+//        beaconsUI.setVisibility(View.VISIBLE);
 
 
         //findViewById(R.id.graphData).setVisibility(View.VISIBLE);
@@ -265,10 +492,16 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d(TAG, "Response: " + response.toString());
                 try {
                     userID=response.getString("mail");
+                    userName = response.getString("displayName");
+                   //
+                     login(userID,userName);
+
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 updateGraphUI(response);
+               // login(userID);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -305,7 +538,7 @@ public class LoginActivity extends AppCompatActivity {
     private void onSignOutClicked() {
 
         /* Attempt to get a user and remove their cookies from cache */
-        List<User> users = null;
+       // List<User> users = null;
 
         try {
             users = sampleApp.getUsers();
@@ -344,9 +577,160 @@ public class LoginActivity extends AppCompatActivity {
         signOutButton.setVisibility(View.INVISIBLE);
         attendenceLog.setVisibility(View.INVISIBLE);
         findViewById(R.id.welcome).setVisibility(View.INVISIBLE);
-       // findViewById(R.id.graphData).setVisibility(View.INVISIBLE);
+        img.setVisibility(View.VISIBLE);
+//        toolbar.setVisibility(View.INVISIBLE);
+//        beaconsUI.setVisibility(View.INVISIBLE);
+        // findViewById(R.id.graphData).setVisibility(View.INVISIBLE);
         //((TextView) findViewById(R.id.graphData)).setText("No Data");
 
+    }
+
+    public void login(String userEmail,String userName){
+
+        //final TextView textView = (TextView) findViewById(R.id.respon);
+        //if everything is fine
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URLs.URL_TOKEN,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //progressBar.setVisibility(View.VISIBLE);
+
+                        try {
+                            //converting string response to json object
+                            JSONObject obj = new JSONObject(response);
+
+                            JSONObject jsondata = obj.getJSONObject("data");
+                            String email = jsondata.getString("email");
+                            String token = jsondata.getString("token");
+
+                            Log.d(TAG, "json respons respone is ======> " + obj);
+                            Log.d(TAG, "ison string email respone is ======> " + email);
+                            Log.d(TAG, "ison string token respone is ======> " + token);
+
+
+                            //if no error in response
+                            if (obj.getBoolean("success")) {
+                                Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_SHORT).show();
+
+//                                //getting the user from the response
+//                                JSONObject userJson = obj.getJSONObject("data");
+//                                Log.d(TAG, "userJson respone is ======> " + userJson);
+
+                                //creating a new user object store email, name and token
+//                                Users user = new Users(
+////                                        userEmail,
+////                                        userName,
+//                                        jsondata.getString("token")
+//                                );
+
+                                Users user = new Users(
+                                        userName,
+                                        userEmail,
+                                        jsondata.getString("token")
+                                );
+
+
+                                //storing the user token in shared preferences
+                                SharedPrefManager.getInstance(getApplicationContext()).userLogin(user);
+
+                                Log.d(TAG, "SharedPrefManager email respone is ======> "
+                                        + SharedPrefManager.getInstance(getApplicationContext()).getUser().getEmail());
+                                Log.d(TAG, "SharedPrefManager name respone is ======> "
+                                        + SharedPrefManager.getInstance(getApplicationContext()).getUser().getName());
+                                Log.d(TAG, "SharedPrefManager token respone is ======> "
+                                        + SharedPrefManager.getInstance(getApplicationContext()).getToken().getToken());
+                                checkBlock(userEmail,SharedPrefManager.getInstance(getApplicationContext()).getToken().getToken());
+
+//                                //starting the MainActivity activity
+//                                finish();
+//                                startActivity(myIntent);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "faild due to ======> "
+                                        + response);
+                                Log.d(TAG, "json respons respone is ======> " + response);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("Content-Type", "application/json");
+                params.put("userEmail", userEmail);
+                params.put("apiAppKey", URLs.API_APP_KEY);
+                params.put("deviceID", "attend");
+                return params;
+            }
+        };
+
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    public void checkBlock(String authemail, String token){
+
+        //final TextView textView = (TextView) findViewById(R.id.respon);
+        //if everything is fine
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, URLs.URL_BLOCKS+authemail,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //progressBar.setVisibility(View.VISIBLE);
+
+                        try {
+                            //converting string response to json object
+                            JSONObject obj = new JSONObject(response);
+
+                            JSONObject jsondata = obj.getJSONObject("data");
+
+
+                            Log.d(TAG, "json respons respone is ======> " + jsondata);
+
+
+                            if (obj.getBoolean("success")) {
+                                Toast.makeText(getApplicationContext(), " user has Block ", Toast.LENGTH_SHORT).show();
+
+
+
+                                //storing the user token in shared preferences
+                                SharedPrefManager.getInstance(getApplicationContext()).userLogin(user);
+
+//                                //starting the MainActivity activity
+//                                finish();
+//                                startActivity(myIntent);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "no Block failed", Toast.LENGTH_SHORT).show();
+
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json; charset=utf-8");
+                headers.put("Authorization", "Bearer" + token);
+                return headers;
+            }
+        };
+
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
 }

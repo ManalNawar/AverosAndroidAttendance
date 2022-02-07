@@ -11,6 +11,7 @@
 
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="large_text">
+
         "Material is the metaphor.\n\n"
 
         "A material metaphor is the unifying theory of a rationalized space and a system of motion."
@@ -100,9 +101,15 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
     <string-array name="scan_array">
         <item>Auto Scanning</item>
         <item>Manual Scanning</item>
     </string-array>
+
+    <!-- Alert Dialog Strings -->
+    <string name="dialog_message">Log out</string>
+    <string name="dialog_title">Are You Sure Want To Logout?</string>
 
 </resources>

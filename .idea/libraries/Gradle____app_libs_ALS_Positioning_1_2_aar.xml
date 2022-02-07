@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: ./app/libs/ALS-Positioning-1.2.aar">
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/38f668ed617ebdf27cfa66f29b760570/jetified-ALS-Positioning-1.2/AndroidManifest.xml" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/38f668ed617ebdf27cfa66f29b760570/jetified-ALS-Positioning-1.2/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/38f668ed617ebdf27cfa66f29b760570/jetified-ALS-Positioning-1.2/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/fa7ea37dcd4bdf8999ac86609b7a1580/transformed/jetified-ALS-Positioning-1.2/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/fa7ea37dcd4bdf8999ac86609b7a1580/transformed/jetified-ALS-Positioning-1.2/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/fa7ea37dcd4bdf8999ac86609b7a1580/transformed/jetified-ALS-Positioning-1.2/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

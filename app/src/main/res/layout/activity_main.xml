@@ -5,93 +5,92 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     tools:context=".MainActivity">
 
-    <RelativeLayout
+
+    <!-- Load the toolbar here -->
+    <include
+        layout="@layout/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="10dp"
-        android:background="@drawable/border">
+        android:layout_height="wrap_content"/>
 
-<!--        <EditText-->
-<!--            android:id="@+id/editTxt"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="35dp"-->
-<!--            android:background="@android:color/transparent"-->
-<!--            android:hint="Enter window time (second)"-->
-<!--            android:inputType="number"-->
-<!--            android:textSize="16sp" />-->
-    </RelativeLayout>
+    <!--    <RelativeLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:paddingStart="10dp"-->
+<!--        android:background="@drawable/border">-->
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/border">
+<!--&lt;!&ndash;        <EditText&ndash;&gt;-->
+<!--&lt;!&ndash;            android:id="@+id/editTxt"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_height="35dp"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:background="@android:color/transparent"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:hint="Enter window time (second)"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:inputType="number"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:textSize="16sp" />&ndash;&gt;-->
+<!--    </RelativeLayout>-->
 
-<!--        <Spinner-->
-<!--            android:id="@+id/scanType"-->
-<!--            style="@style/Widget.AppCompat.DropDownItem.Spinner"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="35dp"-->
-<!--            android:entries="@array/scan_array" />-->
-    </RelativeLayout>
+<!--    <RelativeLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:background="@drawable/border">-->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:id="@+id/RSSILayout"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal" >
+<!--&lt;!&ndash;        <Spinner&ndash;&gt;-->
+<!--&lt;!&ndash;            android:id="@+id/scanType"&ndash;&gt;-->
+<!--&lt;!&ndash;            style="@style/Widget.AppCompat.DropDownItem.Spinner"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_height="35dp"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:entries="@array/scan_array" />&ndash;&gt;-->
+<!--    </RelativeLayout>-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            android:text="Min RSSI"/>
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:gravity="center"-->
+<!--        android:id="@+id/RSSILayout"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:orientation="horizontal" >-->
 
-<!--        <SeekBar-->
-<!--            android:id="@+id/seekBar_rssi"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_weight="1"-->
-<!--            android:progressTint="@color/colorPrimary"-->
-<!--            android:progressBackgroundTint="@color/text_color"-->
-<!--            android:thumbTint="@color/colorPrimaryDark"-->
-<!--            android:visibility="invisible"-->
-<!--            android:layout_height="wrap_content"/>-->
 <!--        <TextView-->
-<!--            android:id="@+id/seekbar_rssi_value"-->
 <!--            android:layout_width="wrap_content"-->
 <!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="5dp" />-->
-    </LinearLayout>
+<!--            android:visibility="invisible"-->
+<!--            android:text="Min RSSI"/>-->
 
-    <Button
-        android:id="@+id/btn"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center_horizontal"
-        android:text="Start Scan"/>
+<!--&lt;!&ndash;        <SeekBar&ndash;&gt;-->
+<!--&lt;!&ndash;            android:id="@+id/seekBar_rssi"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_width="0dp"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_weight="1"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:progressTint="@color/colorPrimary"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:progressBackgroundTint="@color/text_color"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:thumbTint="@color/colorPrimaryDark"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:visibility="invisible"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_height="wrap_content"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;            android:id="@+id/seekbar_rssi_value"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_marginStart="5dp" />&ndash;&gt;-->
+<!--    </LinearLayout>-->
 
-    <Button
-        android:id="@+id/viewAttend"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center_horizontal"
-        android:text="Attendance record"/>
 
-    <Button
-        android:id="@+id/attend"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center_horizontal"
-        android:visibility="invisible"
-        android:text="Submit attendance"/>
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="10dp"
+        android:textColor="@color/text_color"
+        android:textSize="50px" />
+
+    <TextView
+        android:id="@+id/useremail"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginLeft="10dp"
+        android:textColor="@color/text_color"
+        android:textSize="30px" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -102,9 +101,9 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:background="@color/bg_color"
-            android:padding="8dp"
-            android:layout_marginTop="10dp"
-            android:layout_weight="4">
+            android:padding="5dp"
+            android:layout_marginTop="50dp"
+            android:layout_weight="3">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -112,16 +111,56 @@
                 android:id="@+id/txtView"/>
         </ScrollView>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/beacon_list"
+
+
+
+        <Button
+            android:id="@+id/btn"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:listitem="@layout/beacon_list_item" />
+            android:background="#FFFFFF"
+            android:textColor="#FFC300"
+            android:layout_gravity="center_horizontal"
+            android:visibility="invisible"
+            android:text="Start Scan"/>
+
+        <Button
+            android:id="@+id/attend"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50dp"
+            android:background="#FFFFFF"
+            android:text="Submit attendance"
+            android:textColor="@color/text_color"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/viewAttend"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#FFFFFF"
+            android:textColor="#FFC300"
+            android:layout_gravity="center_horizontal"
+            android:visibility="invisible"
+            android:text="Attendance record"/>
+
+
+
+        <!--        <androidx.recyclerview.widget.RecyclerView-->
+<!--            android:id="@+id/beacon_list"-->
+<!--            android:layout_marginTop="10dp"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_weight="1"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            tools:listitem="@layout/beacon_list_item" />-->
     </LinearLayout>
+
+
 
 </LinearLayout>

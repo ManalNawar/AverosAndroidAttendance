@@ -3,14 +3,24 @@ package com.averos.als.positioningdemo;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.Build;
+import android.util.Log;
+
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -18,9 +28,23 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.averos.als.positioning.ALSManager;
 import com.averos.als.positioning.ble.DebugListener;
 import com.averos.als.positioning.ble.model.BeaconNode;
@@ -33,8 +57,19 @@ import com.averos.als.positioning.models.Beacons;
 import com.averos.als.positioning.models.Buildings;
 import com.averos.als.positioning.models.FloorRegion;
 import com.averos.als.positioningdemo.callback.ServerCallback;
+//import com.averos.als.positioningdemo.databinding.ActivityMainBinding;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.microsoft.identity.client.AuthenticationCallback;
+import com.microsoft.identity.client.AuthenticationResult;
+import com.microsoft.identity.client.MsalClientException;
+import com.microsoft.identity.client.MsalException;
+import com.microsoft.identity.client.MsalServiceException;
+import com.microsoft.identity.client.MsalUiRequiredException;
+import com.microsoft.identity.client.PublicClientApplication;
+import com.microsoft.identity.client.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,7 +77,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.message.BasicHeader;
@@ -54,10 +91,19 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 
 import static com.averos.als.positioningdemo.LoginActivity.userID;
 
+
 public class MainActivity extends ALSActivity implements ALSPositionListener {
+
+    final static String CLIENT_ID = "cf3a6b35-96d8-40c4-956a-1e4ef077bbdf";
+    final static String SCOPES [] = {"https://graph.microsoft.com/User.Read"};
+    final static String MSGRAPH_URL = "https://graph.microsoft.com/v1.0/me";
+
 
     private final String APIKey = "VBO0h6fSi3DF4kQ7F02uxhnGkm63m2XOWl1l7bHJARo=";
     private final String companyId = "107";
@@ -71,6 +117,8 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
     private Button attendButton;
     private Spinner scanTypeSpinner;
     private TextView textView;
+    private TextView username;
+    private TextView useremail;
     private boolean isScanning;
     private ProgressDialog progressDialog;
     private AsyncHttpClient client;
@@ -83,11 +131,65 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
     private int startTime;
     public static String regionName;
 
+    /* UI & Debugging Variables */
+    private static final String TAG = LoginActivity.class.getSimpleName();
+    Button callGraphButton;
+    Button signOutButton;
+    Button attendenceLog;
+
+    /* Azure AD Variables */
+     PublicClientApplication sampleApp = LoginActivity.sampleApp;
+     AuthenticationResult authResult = LoginActivity.authResult;
+
+    public static String userID;
+    BottomNavigationView nav_bottom;
+    ImageView img;
+
+    List<User> users;
+    Intent myIntent;
+    Users user;
+    Toolbar toolbar;
+    LinearLayout beaconsUI;
+    String userName;
+    String userEmail;
+
+    Bundle auth;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+         userName = SharedPrefManager.getInstance(getApplicationContext()).getUser().getName();
+         userEmail =  SharedPrefManager.getInstance(getApplicationContext()).getUser().getEmail();
 
+        ////////////////////////////tool bar ////////////////////////////////////
+        toolbar = findViewById(R.id.main_toolbar);
+        // providing title for the ActionBar
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Home");
+
+        ///////////////////sampleapp//////////////
+
+        //users = getIntent().getExtras();
+        //sampleApp = users.getString("sampleApp");
+        // check if user is loggedin
+//        if (SharedPrefManager.getInstance(this).isLoggedIn()) {
+//            finish();
+//            startActivity(new Intent(this, MainActivity.class));
+//        }
+
+        ////////////////////////////tool bar ////////////////////////////////////
+        toolbar = findViewById(R.id.main_toolbar);
+       // beaconsUI = findViewById(R.id.beaconsUI);
+        // providing title for the ActionBar
+        //toolbar.setVisibility(View.INVISIBLE);
+        //beaconsUI.setVisibility(View.INVISIBLE);
+
+
+
+
+////////////////////////////end tool bar////////////////////////////////////
         client = new AsyncHttpClient();
 
         alsManager = new ALSManager(MainActivity.this);
@@ -103,7 +205,22 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
         textView = findViewById(R.id.txtView);
         //scanTypeSpinner = findViewById(R.id.scanType);
         attendButton = findViewById(R.id.attend);
-        recyclerView = findViewById(R.id.beacon_list);
+       // recyclerView = findViewById(R.id.beacon_list);
+
+
+        username =  findViewById(R.id.username);
+        username.setText("welcome, "+ userName);
+        useremail =  findViewById(R.id.useremail);
+        useremail.setText(userEmail);
+
+//        String welcomName = auth.getString("authResult");
+//        welcometext.setText("Welcome, " +authResult.getUser().getName());
+
+
+
+
+
+
         setupBeaconListView();
         getBuildingInfo(APIKey, companyId, new ServerCallback() {
             @Override
@@ -251,8 +368,55 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
            }
         });
 
+        // status bar color
+        if (Build.VERSION.SDK_INT >= 21) {
+            Window window = this.getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(this.getResources().getColor(R.color.border_color));
+        }
+
 
     }
+
+    ////////////////////////////////////////////////////////////////
+
+
+    // method to inflate the options menu when
+    // the user opens the menu for the first time
+    @Override
+    public boolean onCreateOptionsMenu( Menu menu ) {
+
+        getMenuInflater().inflate(R.menu.app_bar_items, menu);
+        //return super.onCreateOptionsMenu(menu);
+        return true;
+    }
+
+    // methods to control the operations that will
+    // happen when user clicks on the action buttons
+    @Override
+    public boolean onOptionsItemSelected( @NonNull MenuItem item ) {
+
+        switch (item.getItemId()){
+            case R.id.records:
+                Intent myIntent = new Intent(getApplicationContext(), ListActivity.class);
+               // myIntent.putExtra("useremail",authResult.getUser().getDisplayableId());
+                startActivity(myIntent);
+                break;
+            case R.id.profile:
+               // Toast.makeText(this, "profile Clicked", Toast.LENGTH_SHORT).show();
+                Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
+                startActivity(profileIntent);
+                break;
+            case R.id.logout:
+                Toast.makeText(this, "logout Clicked", Toast.LENGTH_SHORT).show();
+                onSignOutClicked();
+                //System.out.print(auth.getString("sampleApp"));
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
 
     private DebugListener debugListener;
@@ -427,8 +591,8 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
 
     private void setupBeaconListView() {
         beaconListAdapter = getBeaconListAdapter();
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        recyclerView.setAdapter(beaconListAdapter);
+      //  recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+      //  recyclerView.setAdapter(beaconListAdapter);
     }
 
     private RecyclerView.Adapter getBeaconListAdapter() {
@@ -451,7 +615,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
         };
     }
 
-    private class BeaconViewHolder extends RecyclerView.ViewHolder {
+    class BeaconViewHolder extends RecyclerView.ViewHolder {
         private TextView major, minor, rssi, meanRSSI, uuid;
 
         public BeaconViewHolder(View itemView) {
@@ -480,6 +644,8 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
                     scanButton.setText("Scanning (" + millisUntilFinished / 1000 + ")");
                 else
                     scanButton.setText("Stop Scan (" + millisUntilFinished / 1000 + ")");
+                    //textView.setText("No Location avalable ("+ millisUntilFinished / 1000 +")");
+
             }
 
             public void onFinish() {
@@ -498,4 +664,43 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
         super.onDestroy();
         alsManager.removeLocationListener(MainActivity.this);
     }
+
+    private void onSignOutClicked() {
+
+        /* Attempt to get a user and remove their cookies from cache */
+        // List<User> users = null;
+
+        try {
+            users = sampleApp.getUsers();
+
+            if (users == null) {
+                /* We have no users */
+
+            } else if (users.size() == 1) {
+                /* We have 1 user */
+                /* Remove from token cache */
+                sampleApp.remove(users.get(0));
+               // updateSignedOutUI();
+                startActivity(new Intent(this,LoginActivity.class));
+
+            }
+            else {
+                /* We have multiple users */
+                for (int i = 0; i < users.size(); i++) {
+                    sampleApp.remove(users.get(i));
+                }
+            }
+
+            Toast.makeText(getBaseContext(), "Signed Out!", Toast.LENGTH_SHORT)
+                    .show();
+
+        } catch (MsalClientException e) {
+            Log.d(TAG, "MSAL Exception Generated while getting users: " + e.toString());
+
+        } catch (IndexOutOfBoundsException e) {
+            Log.d(TAG, "User at this position does not exist: " + e.toString());
+        }
+    }
+
+
 }
