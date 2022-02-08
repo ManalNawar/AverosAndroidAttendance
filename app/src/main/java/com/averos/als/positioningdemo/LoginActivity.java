@@ -1,5 +1,10 @@
 package com.averos.als.positioningdemo;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -156,6 +162,8 @@ public class LoginActivity extends AppCompatActivity {
     ImageView img;
 
     List<User> users;
+    AlertDialog.Builder builder;
+
     Intent myIntent;
     Users user;
     //Toolbar toolbar;
@@ -166,6 +174,14 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
+
+
+        builder = new AlertDialog.Builder(this);
+        // Check for Internet Connection
+        if (!checkInternetConnection()) {
+            InternetDialog();
+        }
+
 
         //check if user is loggedin
         if (SharedPrefManager.getInstance(this).isLoggedIn()) {
@@ -198,7 +214,11 @@ public class LoginActivity extends AppCompatActivity {
 
         callGraphButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                onCallGraphClicked();
+                if (!checkInternetConnection()) {
+                    InternetDialog();
+                }else {
+                    onCallGraphClicked();
+                }
             }
         });
 
@@ -715,6 +735,40 @@ public class LoginActivity extends AppCompatActivity {
         };
 
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    public boolean checkInternetConnection() {
+        boolean connected = false;
+        try {
+            ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo nInfo = cm.getActiveNetworkInfo();
+            connected = nInfo != null && nInfo.isAvailable() && nInfo.isConnected();
+
+
+            return connected;
+
+        } catch (Exception e) {
+            Log.e("Connectivity Exception", e.getMessage());
+        }
+        return connected;
+    }
+
+    public void InternetDialog(){
+
+        //set title and message of dialog
+        builder.setMessage("Please check your Internet Connection to use the App") .setTitle("No Internet Connection");
+
+        // dialog actions on YES and NO
+        builder.setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        //Creating dialog box
+        AlertDialog alert = builder.create();
+        //builder.setTitle("No Internet Connection");
+        alert.show();
     }
 
 }
