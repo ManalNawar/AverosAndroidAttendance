@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
         <activity android:name=".ProfileActivity" />
-        <activity android:name=".ListActivity" />
+        <activity android:name=".AttendanceActivity" />
         <activity android:name=".MainActivity" />
         <activity
             android:name=".LoginActivity"

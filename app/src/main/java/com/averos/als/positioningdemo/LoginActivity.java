@@ -186,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         callGraphButton = (Button) findViewById(R.id.callGraph);
-        signOutButton = (Button) findViewById(R.id.clearCache);
+        //signOutButton = (Button) findViewById(R.id.clearCache);
         attendenceLog = (Button) findViewById(R.id.submitattendance);
        // nav_bottom = findViewById(R.id.bottomNavigationView);
         img = findViewById(R.id.icon);
@@ -202,11 +202,11 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        signOutButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                onSignOutClicked();
-            }
-        });
+//        signOutButton.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                onSignOutClicked();
+//            }
+//        });
 
         attendenceLog.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -436,11 +436,11 @@ public class LoginActivity extends AppCompatActivity {
 //
 //        }
         callGraphButton.setVisibility(View.INVISIBLE);
-        signOutButton.setVisibility(View.VISIBLE);
+        //signOutButton.setVisibility(View.VISIBLE);
         attendenceLog.setVisibility(View.VISIBLE);
-        findViewById(R.id.welcome).setVisibility(View.VISIBLE);
-        ((TextView) findViewById(R.id.welcome)).setText("Welcome, " +
-                authResult.getUser().getName());
+//        findViewById(R.id.welcome).setVisibility(View.VISIBLE);
+//        ((TextView) findViewById(R.id.welcome)).setText("Welcome, " +
+//                authResult.getUser().getName());
         //nav_bottom.setVisibility(View.VISIBLE);
         img.setVisibility(View.INVISIBLE);
 
@@ -574,9 +574,9 @@ public class LoginActivity extends AppCompatActivity {
     /* Set the UI for signed-out user */
     private void updateSignedOutUI() {
         callGraphButton.setVisibility(View.VISIBLE);
-        signOutButton.setVisibility(View.INVISIBLE);
+       // signOutButton.setVisibility(View.INVISIBLE);
         attendenceLog.setVisibility(View.INVISIBLE);
-        findViewById(R.id.welcome).setVisibility(View.INVISIBLE);
+        //findViewById(R.id.welcome).setVisibility(View.INVISIBLE);
         img.setVisibility(View.VISIBLE);
 //        toolbar.setVisibility(View.INVISIBLE);
 //        beaconsUI.setVisibility(View.INVISIBLE);
@@ -675,11 +675,11 @@ public class LoginActivity extends AppCompatActivity {
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
-    public void checkBlock(String authemail, String token){
+    public void checkBlock(String userEmail, String token){
 
         //final TextView textView = (TextView) findViewById(R.id.respon);
         //if everything is fine
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, URLs.URL_BLOCKS+authemail,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, URLs.URL_BLOCKS+userEmail,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -689,27 +689,11 @@ public class LoginActivity extends AppCompatActivity {
                             //converting string response to json object
                             JSONObject obj = new JSONObject(response);
 
-                            JSONObject jsondata = obj.getJSONObject("data");
+                           // JSONObject jsondata = obj.getJSONObject("data");
 
 
-                            Log.d(TAG, "json respons respone is ======> " + jsondata);
+                            Log.d(TAG, "checkBlock json respons respone is ======> " + obj);
 
-
-                            if (obj.getBoolean("success")) {
-                                Toast.makeText(getApplicationContext(), " user has Block ", Toast.LENGTH_SHORT).show();
-
-
-
-                                //storing the user token in shared preferences
-                                SharedPrefManager.getInstance(getApplicationContext()).userLogin(user);
-
-//                                //starting the MainActivity activity
-//                                finish();
-//                                startActivity(myIntent);
-                            } else {
-                                Toast.makeText(getApplicationContext(), "no Block failed", Toast.LENGTH_SHORT).show();
-
-                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -725,7 +709,7 @@ public class LoginActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Content-Type", "application/json; charset=utf-8");
-                headers.put("Authorization", "Bearer" + token);
+                headers.put("Authorization", "Bearer " + token);
                 return headers;
             }
         };

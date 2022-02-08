@@ -156,6 +156,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
     Bundle auth;
 
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -209,7 +210,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
 
 
         username =  findViewById(R.id.username);
-        username.setText("welcome, "+ userName);
+        username.setText("welcome "+ userName);
         useremail =  findViewById(R.id.useremail);
         useremail.setText(userEmail);
 
@@ -399,7 +400,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
 
         switch (item.getItemId()){
             case R.id.records:
-                Intent myIntent = new Intent(getApplicationContext(), ListActivity.class);
+                Intent myIntent = new Intent(getApplicationContext(), AttendanceActivity.class);
                // myIntent.putExtra("useremail",authResult.getUser().getDisplayableId());
                 startActivity(myIntent);
                 break;
@@ -408,11 +409,11 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
                 Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
                 startActivity(profileIntent);
                 break;
-            case R.id.logout:
-                Toast.makeText(this, "logout Clicked", Toast.LENGTH_SHORT).show();
-                onSignOutClicked();
-                //System.out.print(auth.getString("sampleApp"));
-                break;
+//            case R.id.logout:
+//                Toast.makeText(this, "logout Clicked", Toast.LENGTH_SHORT).show();
+//                onSignOutClicked();
+//                //System.out.print(auth.getString("sampleApp"));
+//                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -459,7 +460,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
                     OkHttpClient client = new OkHttpClient();
                     RequestBody formBody = new MultipartBody.Builder()
                             .setType(MultipartBody.FORM)
-                            .addFormDataPart("user_email", userID)
+                            .addFormDataPart("user_email", userEmail)
                             .addFormDataPart("beacon_name", regionName)
                             .build();
                     Request request = new Request.Builder()

@@ -5,19 +5,21 @@
     <item android:title="Records"
         android:id="@+id/records"
         android:orderInCategory="100"
+        android:textColor="@color/text_color"
         app:showAsAction="never"
        />
 
     <item android:title="Profile"
         android:id="@+id/profile"
         android:orderInCategory="100"
+        android:textColor="@color/blue_dark"
         app:showAsAction="never"
        />
 
-    <item android:title="log out"
-        android:id="@+id/logout"
-        android:orderInCategory="100"
-        app:showAsAction="never"
-       />
+<!--    <item android:title="log out"-->
+<!--        android:id="@+id/logout"-->
+<!--        android:orderInCategory="100"-->
+<!--        app:showAsAction="never"-->
+<!--       />-->
 
 </menu>

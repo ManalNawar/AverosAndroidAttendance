@@ -131,6 +131,7 @@ public class ProfileActivity extends AppCompatActivity {
                 /* We have 1 user */
                 /* Remove from token cache */
                 sampleApp.remove(users.get(0));
+                // remove save user from shared perfrence
                 SharedPrefManager.getInstance(getApplicationContext()).logout();
                 // updateSignedOutUI();
                 startActivity(new Intent(this,LoginActivity.class));

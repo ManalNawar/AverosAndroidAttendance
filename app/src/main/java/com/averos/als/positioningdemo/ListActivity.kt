@@ -35,8 +35,9 @@ class ListActivity : AppCompatActivity() {
         var userName = SharedPrefManager.getInstance(this).user.name
         var recyclerView = findViewById<RecyclerView>(R.id.recycle)
 
-        print(userEmail)
-        print(userName)
+        print("kotlin email is $userEmail")
+        print("kotlin name is $userName")
+
 
         //////////toolbar//////////////////
         var toolbar = findViewById<View>(R.id.main_toolbar) as Toolbar
@@ -69,7 +70,7 @@ class ListActivity : AppCompatActivity() {
             //final TextView textView = (TextView) findViewById(R.id.respon);
             //if everything is fine
             val stringRequest: StringRequest = object : StringRequest(
-                Method.GET, URLs.URL_ATTENDANCE + LoginActivity.authResult.getUser().displayableId,
+                Method.GET, URLs.URL_ATTENDANCE + userEmail,
                 com.android.volley.Response.Listener { response ->
                     //progressBar.setVisibility(View.VISIBLE);
                     try {

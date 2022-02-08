@@ -27,23 +27,23 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:srcCompat="@drawable/logo" />
 
-    <TextView
-        android:id="@+id/welcome"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="90dp"
-        android:layout_marginLeft="10dp"
-        android:text="Welcome, "
-        android:textColor="@color/text_color"
-        android:textSize="70px"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.332"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+<!--    <TextView-->
+<!--        android:id="@+id/welcome"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="70dp"-->
+<!--        android:layout_marginTop="90dp"-->
+<!--        android:layout_marginLeft="10dp"-->
+<!--        android:text="Welcome, "-->
+<!--        android:textColor="@color/text_color"-->
+<!--        android:textSize="70px"-->
+<!--        android:visibility="invisible"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.332"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintVertical_bias="0.0" />-->
 
 <!--    <LinearLayout-->
 <!--        android:id="@+id/beaconsUI"-->
@@ -180,22 +180,22 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 
-    <Button
-        android:id="@+id/clearCache"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="300dp"
-        android:background="#FFFFFF"
-        android:text="Sign Out"
-        android:textAllCaps="true"
-        android:textColor="@color/text_color"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.665" />
+<!--    <Button-->
+<!--        android:id="@+id/clearCache"-->
+<!--        android:layout_width="250dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="300dp"-->
+<!--        android:background="#FFFFFF"-->
+<!--        android:text="Sign Out"-->
+<!--        android:textAllCaps="true"-->
+<!--        android:textColor="@color/text_color"-->
+<!--        android:visibility="invisible"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.503"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintVertical_bias="0.665" />-->
     <!--    <FrameLayout-->
 <!--        android:id="@+id/flFragment"-->
 <!--        android:layout_width="match_parent"-->
