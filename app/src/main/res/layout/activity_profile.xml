@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bgcolor"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <include
@@ -16,11 +17,11 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="192dp"
-        android:textSize="40px"
-        android:background="#fff"
+        android:textSize="20sp"
+        android:background="@color/cardcolor"
         android:elevation="1dp"
         android:padding="20dp"
-        android:textColor="@color/text_color"
+        android:textColor="@color/textcolor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -33,11 +34,11 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="252dp"
-        android:background="#fff"
+        android:background="@color/cardcolor"
         android:elevation="1dp"
         android:padding="20dp"
-        android:textColor="@color/text_color"
-        android:textSize="40px"
+        android:textColor="@color/textcolor"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -45,6 +46,39 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/darkmode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@color/cardcolor"
+        android:elevation="1dp"
+        android:padding="20dp"
+        android:text="Dark Mode"
+        android:textColor="@color/textcolor"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/useremail" />
+
+    <!--    <Switch-->
+<!--        android:id="@+id/darkmode"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="29dp"-->
+<!--        android:layout_marginBottom="84dp"-->
+<!--        android:paddingLeft="20dp"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/logout"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.0"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/useremail"-->
+<!--        app:layout_constraintVertical_bias="0.0"-->
+<!--        tools:ignore="UseSwitchCompatOrMaterialXml" />-->
+
+
 
     <Button
         android:id="@+id/logout"
@@ -57,6 +91,7 @@
         android:padding="20dp"
         android:text="Logout"
         android:textColor="@color/bg_color"
+        android:textSize="40px"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -94,5 +129,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="bgcolor">#212332</color>
+    <color name="textcolor">#959CAA</color>
+    <color name="cardcolor">#2A2D3E</color>
+    <color name="statuscolor">#212332</color>
+    <color name="locationbg">#2A2D3E</color>
+
+
+
+</resources>

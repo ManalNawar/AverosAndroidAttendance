@@ -1,22 +1,20 @@
 package com.averos.als.positioningdemo;
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -27,6 +25,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
@@ -38,104 +38,18 @@ import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.User;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 
-import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
-import android.content.Intent;
-import android.os.Build;
-import android.util.Log;
+import androidx.core.app.ActivityCompat;
 
-import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.Spinner;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.averos.als.positioning.ALSManager;
-import com.averos.als.positioning.ble.DebugListener;
-import com.averos.als.positioning.ble.model.BeaconNode;
-import com.averos.als.positioning.location.ALSPositionListener;
-import com.averos.als.positioning.location.IndoorLocation;
-import com.averos.als.positioning.misc.ALSActivity;
-import com.averos.als.positioning.misc.ALSConstants;
-import com.averos.als.positioning.misc.ALSUtils;
-import com.averos.als.positioning.models.Beacons;
-import com.averos.als.positioning.models.Buildings;
-import com.averos.als.positioning.models.FloorRegion;
-import com.averos.als.positioningdemo.callback.ServerCallback;
 //import com.averos.als.positioningdemo.databinding.ActivityMainBinding;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.microsoft.identity.client.AuthenticationCallback;
-import com.microsoft.identity.client.AuthenticationResult;
-import com.microsoft.identity.client.MsalClientException;
-import com.microsoft.identity.client.MsalException;
-import com.microsoft.identity.client.MsalServiceException;
-import com.microsoft.identity.client.MsalUiRequiredException;
-import com.microsoft.identity.client.PublicClientApplication;
-import com.microsoft.identity.client.User;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import cz.msebera.android.httpclient.Header;
-import cz.msebera.android.httpclient.message.BasicHeader;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -161,6 +75,7 @@ public class LoginActivity extends AppCompatActivity {
     BottomNavigationView nav_bottom;
     ImageView img;
 
+
     List<User> users;
     AlertDialog.Builder builder;
 
@@ -175,13 +90,17 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
 
-
         builder = new AlertDialog.Builder(this);
+
         // Check for Internet Connection
         if (!checkInternetConnection()) {
-            InternetDialog();
+            internetPermissionDialog("Please check your Internet Connection to use the App","No Internet Connection");
         }
 
+        // location permission
+        if (!checkLocationPermission()) {
+        internetPermissionDialog("Location Should be turn on to use the App","Location turned off");
+        }
 
         //check if user is loggedin
         if (SharedPrefManager.getInstance(this).isLoggedIn()) {
@@ -215,7 +134,11 @@ public class LoginActivity extends AppCompatActivity {
         callGraphButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!checkInternetConnection()) {
-                    InternetDialog();
+                    internetPermissionDialog("Please check your Internet Connection to use the App","No Internet Connection");
+                    // location permission
+                    if (!checkLocationPermission()) {
+                        internetPermissionDialog("Location Should be turn on to use the App","Location turned off");
+                    }
                 }else {
                     onCallGraphClicked();
                 }
@@ -318,7 +241,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-//
+    //
 // App callbacks for MSAL
 // ======================
 // getActivity() - returns activity so we can acquireToken within a callback
@@ -753,10 +676,38 @@ public class LoginActivity extends AppCompatActivity {
         return connected;
     }
 
-    public void InternetDialog(){
+//    public boolean checkLocationPermission(){
+//        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED){
+//            fusedLocationClint.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+//                @Override
+//                public void onSuccess(Location location) {
+//
+//                    if(location != null){
+//                        System.out.print(location);
+//                    }else {
+//                        LocationPermission();
+//                    }
+//                }
+//            });
+//        }
+//        return false;
+//    }
+    public boolean checkLocationPermission(){
+
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }else {
+            return false;
+        }
+
+    }
+
+    public void internetPermissionDialog(String message, String title){
 
         //set title and message of dialog
-        builder.setMessage("Please check your Internet Connection to use the App") .setTitle("No Internet Connection");
+        builder.setMessage(message) .setTitle(title);
 
         // dialog actions on YES and NO
         builder.setCancelable(false)

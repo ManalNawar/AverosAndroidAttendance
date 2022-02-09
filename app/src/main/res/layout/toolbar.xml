@@ -6,7 +6,7 @@
     android:minHeight="?attr/actionBarSize"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
-    app:titleTextColor="@color/text_color"
+    android:background="@color/bgcolor"
+    app:titleTextColor="@color/textcolor"
     android:elevation="4dp">
     </androidx.appcompat.widget.Toolbar>

@@ -374,7 +374,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
             Window window = this.getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.setStatusBarColor(this.getResources().getColor(R.color.border_color));
+            window.setStatusBarColor(this.getResources().getColor(R.color.statuscolor));
         }
 
 
@@ -464,7 +464,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
                             .addFormDataPart("beacon_name", regionName)
                             .build();
                     Request request = new Request.Builder()
-                            .url("https://attend.ksauhs.com/api/attendance/")
+                            .url("https://attend.itjed.com/api/attendance/")
                             .post(formBody)
                             .build();
 

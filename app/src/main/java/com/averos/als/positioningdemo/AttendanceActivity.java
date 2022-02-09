@@ -1,9 +1,12 @@
 package com.averos.als.positioningdemo;
 
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -51,6 +54,15 @@ public class AttendanceActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("my Attendance");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // status bar color
+        if (Build.VERSION.SDK_INT >= 21) {
+            Window window = this.getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(this.getResources().getColor(R.color.statuscolor));
+        }
+
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/bgcolor"
     tools:context=".MainActivity">
 
 
@@ -81,16 +82,16 @@
         android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:layout_marginLeft="10dp"
-        android:textColor="@color/text_color"
-        android:textSize="50px" />
+        android:textColor="@color/textcolor"
+        android:textSize="30sp" />
 
     <TextView
         android:id="@+id/useremail"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_marginLeft="10dp"
-        android:textColor="@color/text_color"
-        android:textSize="30px" />
+        android:textColor="@color/textcolor"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -100,7 +101,7 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="@color/bg_color"
+            android:background="@color/locationbg"
             android:padding="5dp"
             android:layout_marginTop="50dp"
             android:layout_weight="3">
@@ -108,6 +109,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
+                android:textColor="@color/textcolor"
                 android:id="@+id/txtView"/>
         </ScrollView>
 
@@ -131,9 +133,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="50dp"
-            android:background="#FFFFFF"
+            android:background="@color/cardcolor"
             android:text="Submit attendance"
-            android:textColor="@color/text_color"
+            android:textColor="@color/textcolor"
             android:visibility="visible" />
 
         <Button

@@ -1,5 +1,6 @@
 package com.averos.als.positioningdemo;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -9,6 +10,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +22,8 @@ import com.microsoft.identity.client.User;
 import java.util.List;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 
 
@@ -40,7 +45,9 @@ public class ProfileActivity extends AppCompatActivity {
     Button logout;
     Toolbar toolbar;
     AlertDialog.Builder builder;
+    SwitchCompat darkmode;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +58,7 @@ public class ProfileActivity extends AppCompatActivity {
             Window window = this.getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.setStatusBarColor(this.getResources().getColor(R.color.border_color));
+            window.setStatusBarColor(this.getResources().getColor(R.color.statuscolor));
         }
 
         //toolbar
@@ -77,6 +84,25 @@ public class ProfileActivity extends AppCompatActivity {
         useremail = findViewById(R.id.useremail);
         useremail.setText("Email: "+userEmail);
 
+        darkmode = findViewById(R.id.darkmode);
+
+                //if night mode is on switch is checked
+        if(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
+            darkmode.setChecked(true);
+        }else{
+            darkmode.setChecked(false);
+        }
+        darkmode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean ischecked) {
+                if(ischecked){
+                    DarkModeOn();
+                }else{
+                    DarkModeOff();
+                }
+
+            }
+        });
 
         builder = new AlertDialog.Builder(this);
         logout = findViewById(R.id.logout);
@@ -86,13 +112,7 @@ public class ProfileActivity extends AppCompatActivity {
                 Dialog();
             }
         });
-
-
-
-
-
     }
-
     public void Dialog(){
 
         //set title and message of dialog
@@ -153,8 +173,12 @@ public class ProfileActivity extends AppCompatActivity {
         } catch (IndexOutOfBoundsException e) {
             System.out.print("User at this position does not exist: " + e.toString());
         }
+    }
 
-
-
+    public void DarkModeOn(){
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+    }
+    public void DarkModeOff(){
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 }
