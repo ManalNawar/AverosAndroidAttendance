@@ -1,6 +1,8 @@
 package com.averos.als.positioningdemo;
 
 import android.app.ProgressDialog;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,10 +21,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -51,8 +58,13 @@ public class AttendanceActivity extends AppCompatActivity {
         userEmail = SharedPrefManager.getInstance(getApplicationContext()).getUser().getEmail();
         //toolbar
         toolbar = findViewById(R.id.main_toolbar);
+        //toolbar back button color change
+        Drawable backbt = getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24);
+        backbt.setColorFilter(getResources().getColor(R.color.textcolor), PorterDuff.Mode.SRC_ATOP);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("my Attendance");
+        getSupportActionBar().setHomeAsUpIndicator(backbt);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // status bar color
@@ -78,8 +90,6 @@ public class AttendanceActivity extends AppCompatActivity {
         attendancelist = getdata(token);
         RecyclerViewAdapter = new RecyclerViewAdapter(this,attendancelist);
         recyclerView.setAdapter(RecyclerViewAdapter);
-
-
     }
 
     public static void notifyRecyclerViewAdapter(){
@@ -88,7 +98,7 @@ public class AttendanceActivity extends AppCompatActivity {
     }
 
     public List<AttendanceList> getdata(String token){
-        attendancelist.clear();
+        //attendancelist.clear();
         ProgressDialog progressdialog = new ProgressDialog(this);
         progressdialog.setMessage("Loading...");
         progressdialog.show();
@@ -103,23 +113,41 @@ public class AttendanceActivity extends AppCompatActivity {
                             //converting string response to json object
                             JSONArray objA = new JSONArray(response);
 
+                            for(int i = 0; i< objA.length(); i++){
 
-                            JSONObject obj =  objA.getJSONObject(0);
+                                JSONObject obj =  objA.getJSONObject(i);
+                                JSONObject bloctitle = obj.getJSONObject("block");
+
+                                Log.d(TAG, "======block title IS ============>: " + bloctitle);
 
 
-                            String beacon = obj.getString("beacon");
-                            String time = obj.getString("created_at");
-                            Log.d(TAG, "======BEACON IS ============>: " + beacon);
-                            Log.d(TAG, "======time IS ============>: " + time);
 
-                            AttendanceList list = new AttendanceList();
-                            list.setBeacon(obj.getString("beacon"));
-                            list.setCreated_at(obj.getString("created_at"));
-                            Log.d(TAG, "======list BEACON IS ============>: " + list.getBeacon());
+                                String beacon = obj.getString("beacon");
+                                String time = obj.getString("created_at");
+                                Log.d(TAG, "======BEACON IS ============>: " + beacon);
+                                Log.d(TAG, "======time IS ============>: " + time);
 
-                            attendancelist.add(list);
-                            RecyclerViewAdapter.notifyDataSetChanged();
-                            progressdialog.dismiss();
+                                Log.d(TAG, "======block title IS ============>: " + obj.getString("block"));
+
+
+
+                                String formatedate = obj.getString("created_at");
+
+
+                                AttendanceList list = new AttendanceList();
+                                list.setBeacon(obj.getString("beacon"));
+                                list.setCreated_at(formatDate(formatedate));
+                                list.setBlockTitle(bloctitle.getString("block_title"));
+                                Log.d(TAG, "======list BEACON IS ============>: " + list.getBeacon());
+
+                                attendancelist.add(list);
+                                RecyclerViewAdapter.notifyDataSetChanged();
+                                progressdialog.dismiss();
+
+                            }
+
+
+
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -143,5 +171,17 @@ public class AttendanceActivity extends AppCompatActivity {
 
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
         return attendancelist;
+    }
+
+    private String formatDate(String dateStr){
+        try {
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date = fmt.parse(dateStr);
+            SimpleDateFormat fmtOut  = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return  fmtOut.format(date);
+        } catch (ParseException e) {
+            Log.e("error", e.getMessage());
+        }
+        return "";
     }
 }

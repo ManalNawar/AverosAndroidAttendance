@@ -1,29 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:focusable="true"
-    android:clickable="true"
+    android:layout_height="wrap_content"
     android:background="@color/cardcolor"
+    android:clickable="true"
     android:elevation="1dp"
-    android:layout_height="wrap_content">
+    android:focusable="true">
 
-<!--    <TextView-->
-<!--        android:id="@+id/block_title"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginBottom="16dp"-->
-<!--        android:layout_marginTop="10sp"-->
-<!--        android:text="Block"-->
-<!--        android:textColor="#000"-->
-<!--        android:textSize="16sp" />-->
+    <!--    <TextView-->
+    <!--        android:id="@+id/block_title"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginBottom="16dp"-->
+    <!--        android:layout_marginTop="10sp"-->
+    <!--        android:text="Block"-->
+    <!--        android:textColor="#000"-->
+    <!--        android:textSize="16sp" />-->
 
     <TextView
         android:id="@+id/beacon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:textColor="@color/textcolor"
+        android:textSize="40px"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/blocktitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
         android:padding="10dp"
         android:textColor="@color/textcolor"
         android:textSize="40px"
@@ -38,12 +52,25 @@
         android:id="@+id/time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="40dp"
         android:padding="10dp"
         android:textColor="@color/textcolor"
         android:textSize="40px"
         app:layout_constraintTop_toBottomOf="@+id/beacon"
         tools:layout_editor_absoluteX="0dp" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        app:layout_constraintWidth_percent="0.9"
+        android:layout_height="1dp"
+        android:background="@color/bordercolor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/time"
+        tools:ignore="MissingConstraints" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

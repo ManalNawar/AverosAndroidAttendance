@@ -2,7 +2,12 @@ package com.averos.als.positioningdemo;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
 import android.os.Build;
 import android.util.Log;
 
@@ -19,8 +24,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -30,6 +37,9 @@ import android.widget.Toast;
 
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -60,6 +70,7 @@ import com.averos.als.positioningdemo.callback.ServerCallback;
 //import com.averos.als.positioningdemo.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.microsoft.identity.client.AuthenticationCallback;
@@ -100,11 +111,6 @@ import static com.averos.als.positioningdemo.LoginActivity.userID;
 
 public class MainActivity extends ALSActivity implements ALSPositionListener {
 
-    final static String CLIENT_ID = "cf3a6b35-96d8-40c4-956a-1e4ef077bbdf";
-    final static String SCOPES [] = {"https://graph.microsoft.com/User.Read"};
-    final static String MSGRAPH_URL = "https://graph.microsoft.com/v1.0/me";
-
-
     private final String APIKey = "VBO0h6fSi3DF4kQ7F02uxhnGkm63m2XOWl1l7bHJARo=";
     private final String companyId = "107";
     private Buildings buildings;
@@ -119,6 +125,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
     private TextView textView;
     private TextView username;
     private TextView useremail;
+    private TextView bloctitle;
     private boolean isScanning;
     private ProgressDialog progressDialog;
     private AsyncHttpClient client;
@@ -152,8 +159,18 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
     LinearLayout beaconsUI;
     String userName;
     String userEmail;
+    String token;
+    private static String blocTitle;
+    TextView className;
+    ImageButton classNamebt;
+    AlertDialog.Builder builder;
+    ImageView imageview;
+    boolean isDarkMode;
 
     Bundle auth;
+
+    public MainActivity() {
+    }
 
 
     @SuppressLint("SetTextI18n")
@@ -161,15 +178,42 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Check for Internet Connection
+        if (!Connection.InternetConnection(MainActivity.this)) {
+            Connection.Dialog(MainActivity.this,"Please check your Internet Connection to use the App","No Internet Connection");
+
+        }
+
+        imageview = findViewById(R.id.imageview);
+
+        // check the theme mode saved in shared preference.
+        isDarkMode = SharedPrefManager.getInstance(getApplicationContext()).isDarkMode();
+
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            imageview.setImageResource(R.drawable.image_dark);
+        }
+        else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
          userName = SharedPrefManager.getInstance(getApplicationContext()).getUser().getName();
          userEmail =  SharedPrefManager.getInstance(getApplicationContext()).getUser().getEmail();
+         token = SharedPrefManager.getInstance(getApplicationContext()).getToken().getToken();
+
+        checkBlock(userEmail,token);
 
         ////////////////////////////tool bar ////////////////////////////////////
         toolbar = findViewById(R.id.main_toolbar);
+        //toolbar three dots color change
+        toolbar.getOverflowIcon().setColorFilter(getResources().getColor(R.color.textcolor) , PorterDuff.Mode.SRC_ATOP);
+
         // providing title for the ActionBar
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Home");
 
+        builder = new AlertDialog.Builder(this);
         ///////////////////sampleapp//////////////
 
         //users = getIntent().getExtras();
@@ -181,7 +225,8 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
 //        }
 
         ////////////////////////////tool bar ////////////////////////////////////
-        toolbar = findViewById(R.id.main_toolbar);
+        //toolbar = findViewById(R.id.main_toolbar);
+
        // beaconsUI = findViewById(R.id.beaconsUI);
         // providing title for the ActionBar
         //toolbar.setVisibility(View.INVISIBLE);
@@ -195,15 +240,13 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
 
         alsManager = new ALSManager(MainActivity.this);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Initializing...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+
+
 
         //editTextScanWindow = findViewById(R.id.editTxt);
         scanButton = findViewById(R.id.btn);
         postButton = findViewById(R.id.viewAttend);
-        textView = findViewById(R.id.txtView);
+        //textView = findViewById(R.id.txtView);
         //scanTypeSpinner = findViewById(R.id.scanType);
         attendButton = findViewById(R.id.attend);
        // recyclerView = findViewById(R.id.beacon_list);
@@ -213,62 +256,102 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
         username.setText("welcome "+ userName);
         useremail =  findViewById(R.id.useremail);
         useremail.setText(userEmail);
+        bloctitle = findViewById(R.id.bloctitle);
 
-//        String welcomName = auth.getString("authResult");
-//        welcometext.setText("Welcome, " +authResult.getUser().getName());
+        progressDialog = new ProgressDialog(this);
+
+        className = findViewById(R.id.classname);
+        classNamebt = findViewById(R.id.imageButton);
+        classNamebt.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                // Check for Internet Connection
+                if (!Connection.InternetConnection(MainActivity.this)) {
+                    Connection.Dialog(MainActivity.this,"Please check your Internet Connection to use the App","No Internet Connection");
+
+                }
+                progressDialog.setTitle("Searching...");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+                getBuildingInfo(APIKey, companyId, new ServerCallback() {
+                    @Override
+                    public void onResponse(boolean status, String response) {
+                        buildings = new Buildings(getApplicationContext(), response);
+                        getBeacons(APIKey, companyId, new ServerCallback() {
+                            @Override
+                            public void onResponse(boolean status, String response) {
+                                beacons = new Beacons(getApplicationContext(), response);
+
+                                if (buildings.message.equals(ALSConstants.SUCCESS_RESPONSE) && beacons.message.equals(ALSConstants.SUCCESS_RESPONSE)) {
+                                    //Toast.makeText(MainActivity.this, "successfully initialized", Toast.LENGTH_SHORT).show();
+                                    alsManager.initialize(beacons.beacons, buildings.buildings);
+                                    alsManager.addLocationListener(MainActivity.this);
+                                    scanButton.callOnClick();
+                                } else {
+                                    scanButton.setClickable(false);
+                                    Toast.makeText(MainActivity.this, "Not initialized", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                });
+
+                //className.setText(regionName);
+//
+                className.setVisibility(View.VISIBLE);
+                className.setText(regionName);
 
 
+                //                        classNamebt.setVisibility(View.VISIBLE);
+//                        className.setVisibility(View.INVISIBLE);
+//
+//                        String email ="alsaylanih@ksau-hh.edu.sa";
+//                        String[] split = email.split("@");
+//                        System.out.print(split);
+//                        Log.d(TAG, "split is : " + split);
+//                        String domain = split[1];
+//                        if (!domain.equals("ksau-hs.edu.sa")){
+//                            Log.d(TAG, " No login");
+//
+//                        }else {
+//                            Log.d(TAG, "can login");
+//
+//                        }
+//                        Log.d(TAG, "domain is : " + domain);
+
+            }
+        });
 
 
 
 
         setupBeaconListView();
-        getBuildingInfo(APIKey, companyId, new ServerCallback() {
+
+
+        TextView seekbarValue = findViewById(R.id.seekbar_rssivalue);
+        seekbarValue.setText("-120 dbm");
+        SeekBar rssiSeekbar = findViewById(R.id.seekBarrssi);
+        rssiSeekbar.setMax(120);
+        rssiSeekbar.setProgress(rssiSeekbar.getMax());
+        rssiSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onResponse(boolean status, String response) {
-                buildings = new Buildings(getApplicationContext(), response);
-                getBeacons(APIKey, companyId, new ServerCallback() {
-                    @Override
-                    public void onResponse(boolean status, String response) {
-                        beacons = new Beacons(getApplicationContext(), response);
-                        progressDialog.dismiss();
-                        if (buildings.message.equals(ALSConstants.SUCCESS_RESPONSE) && beacons.message.equals(ALSConstants.SUCCESS_RESPONSE)) {
-                            Toast.makeText(MainActivity.this, "successfully initialized", Toast.LENGTH_SHORT).show();
-                            alsManager.initialize(beacons.beacons, buildings.buildings);
-                            alsManager.addLocationListener(MainActivity.this);
-                            scanButton.callOnClick();
-                        } else {
-                            scanButton.setClickable(false);
-                            Toast.makeText(MainActivity.this, "Not initialized", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
+                int value = (progress)*-1;
+                seekbarValue.setText(value+" dBm");
+                alsManager.setMinimumRSSI(value);
             }
         });
-
-  //      TextView seekbarValue = findViewById(R.id.seekbar_rssi_value);
-//        seekbarValue.setText("-120 dbm");
-  //      SeekBar rssiSeekbar = findViewById(R.id.seekBar_rssi);
-      //  rssiSeekbar.setMax(120);
-   //     rssiSeekbar.setProgress(rssiSeekbar.getMax());
-//        rssiSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//                // TODO Auto-generated method stub
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//                // TODO Auto-generated method stub
-//            }
-//
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
-//                int value = (progress)*-1;
-//                seekbarValue.setText(value+" dBm");
-//                alsManager.setMinimumRSSI(value);
-//            }
-//        });
 
         scanButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -301,73 +384,6 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
 
 
 
-        postButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(getApplicationContext(), ListActivity.class);
-                startActivity(myIntent);
-                //setContentView(R.layout.attendance_list);
-
-//                TableLayout tl = (TableLayout)findViewById(R.id.tableLayout1);
-//                TableRow row = new TableRow(this);
-//                TextView tv = new TextView(this);
-//                tv.setText("This is text");
-//
-//                tl.addView(row);
-//                row.addView(tv);
-
-
- //               OkHttpClient client = new OkHttpClient();
-//                RequestBody formBody = new MultipartBody.Builder()
-//                        .setType(MultipartBody.FORM)
-//                        .addFormDataPart("user_email", userID)
-//                        .build();
-  //              HttpUrl url = HttpUrl.parse("https://attend.ksauhs.com/api/attendance/user/"+userID).newBuilder()
-                        //.addQueryParameter("user_email", userID)
-//                        .build();
-//                Request request = new Request.Builder()
-//                        .url(url)
-//                        .method("GET", null)
-//                        .build();
-//
-//                Call call = client.newCall(request);
-//                call.enqueue(new Callback() {
-//
-//                    @Override
-//                    public void onResponse(Call call, Response response) throws IOException {
-//                            runOnUiThread(new Runnable() {
-//                                public void run() {
-//                                    final Toast toast = Toast.makeText(MainActivity.this,response.body().toString(),Toast.LENGTH_LONG);
-//                                    toast.show();
-//                                    try {
-//                                        String jsonData=response.body().string();
-//                                        JSONArray Jobject = new JSONArray(jsonData);
-//                                        for(int i=0; i < 10; i++) {
-//                                            JSONObject jsonobject = Jobject.getJSONObject(i);
-//                                            int id = jsonobject.getInt("id");
-//                                            System.out.println(id);
-//                                        }
-//                                    } catch (IOException | JSONException e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                }
-//                            });
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call call, IOException e) {
-//                        runOnUiThread(new Runnable() {
-//                            public void run() {
-//                                final Toast toast = Toast.makeText(MainActivity.this, "failed to fetch api",Toast.LENGTH_LONG);
-//                                toast.show();
-//                            }
-//                        });
-//                        System.out.println("failed to fetch api");
-//                    }
-//
-//                });
-           }
-        });
 
         // status bar color
         if (Build.VERSION.SDK_INT >= 21) {
@@ -409,11 +425,6 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
                 Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
                 startActivity(profileIntent);
                 break;
-//            case R.id.logout:
-//                Toast.makeText(this, "logout Clicked", Toast.LENGTH_SHORT).show();
-//                onSignOutClicked();
-//                //System.out.print(auth.getString("sampleApp"));
-//                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -446,69 +457,32 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
 
                  System.out.println("this is the region"+regionName);
             }
-            textView.setText(
-                    "Location X : " + location.x +
-                            "\nLocation Y : " + location.y +
-                            "\n\nBuilding ID : " + location.buildingId +
-                            "\n\nBuilding Name : " + location.buildingName +
-                            "\n\nFloor ID : " + location.floor +
-                            string);
-            attendButton.setVisibility(View.VISIBLE);
+//            className.setText(regionName);
+//            if(className.toString().isEmpty()){
+//            }else {
+//                className.setText(regionName);
+//            }
+//            textView.setText(
+//                    "Location X : " + location.x +
+//                            "\nLocation Y : " + location.y +
+//                            "\n\nBuilding ID : " + location.buildingId +
+//                            "\n\nBuilding Name : " + location.buildingName +
+//                            "\n\nFloor ID : " + location.floor +
+//                            string);
+
+            className.setText(regionName);
+            progressDialog.dismiss();
             attendButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    OkHttpClient client = new OkHttpClient();
-                    RequestBody formBody = new MultipartBody.Builder()
-                            .setType(MultipartBody.FORM)
-                            .addFormDataPart("user_email", userEmail)
-                            .addFormDataPart("beacon_name", regionName)
-                            .build();
-                    Request request = new Request.Builder()
-                            .url("https://attend.itjed.com/api/attendance/")
-                            .post(formBody)
-                            .build();
 
-                    Call call = client.newCall(request);
-                    call.enqueue(new Callback() {
+                    submitattendance(token,userEmail,regionName);
 
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-                            if (response.isSuccessful()) {
-                                runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        final Toast toast = Toast.makeText(MainActivity.this, response.message(),Toast.LENGTH_LONG);
-                                        toast.show();
-                                    }
-                                });
-                                System.out.println("attendance was logged");
-                            }
-                            else {
-                                runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        final Toast toast = Toast.makeText(MainActivity.this, "Error submitting the attendance",Toast.LENGTH_LONG);
-                                        toast.show();
-                                    }
-                                });
-                                System.out.println("Error submitting the attendance");
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    final Toast toast = Toast.makeText(MainActivity.this, "failed to fetch api",Toast.LENGTH_LONG);
-                                    toast.show();
-                                }
-                            });
-                            System.out.println("failed to fetch api");
-                        }
-
-                    });
                 }
             });
         } else {
-            textView.setText("No location available");
+            className.setText("Class not found");
+            progressDialog.dismiss();
             clearBeaconsList();
         }
 
@@ -555,6 +529,10 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 String response = new String(responseBody);
+
+                Log.d(TAG, "response json respons respone is ======> " + response);
+
+
                 callback.onResponse(true, response);
             }
 
@@ -580,6 +558,10 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 String response = new String(responseBody);
+
+                Log.d(TAG, "response json respons respone is ======> " + response);
+
+
                 callback.onResponse(true, response);
             }
 
@@ -666,41 +648,202 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
         alsManager.removeLocationListener(MainActivity.this);
     }
 
-    private void onSignOutClicked() {
 
-        /* Attempt to get a user and remove their cookies from cache */
-        // List<User> users = null;
 
-        try {
-            users = sampleApp.getUsers();
+    public void submitattendance(String token,String useremail,String regionname){
 
-            if (users == null) {
-                /* We have no users */
+        progressDialog.setTitle("Submitting...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
-            } else if (users.size() == 1) {
-                /* We have 1 user */
-                /* Remove from token cache */
-                sampleApp.remove(users.get(0));
-               // updateSignedOutUI();
-                startActivity(new Intent(this,LoginActivity.class));
+        OkHttpClient client = new OkHttpClient();
+        RequestBody formBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("user_email", useremail)
+                .addFormDataPart("beacon_name", regionname)
+                .build();
 
-            }
-            else {
-                /* We have multiple users */
-                for (int i = 0; i < users.size(); i++) {
-                    sampleApp.remove(users.get(i));
+        Request request = new Request.Builder()
+                .url(URLs.URL_ATTENDANCE_SUBMIT)
+                .post(formBody)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", "Bearer " + token)
+                .build();
+
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            progressDialog.dismiss();
+                            Dialog("Thank you "+ userName,"attendance taken successfully");
+                        }
+                    });
+                    System.out.println("attendance was logged");
+                }
+                else {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Dialog("Error ","Error submitting the attendance");
+
+                        }
+                    });
+                    System.out.println("Error submitting the attendance");
                 }
             }
 
-            Toast.makeText(getBaseContext(), "Signed Out!", Toast.LENGTH_SHORT)
-                    .show();
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Dialog("failed ","failed to fetch api");
+                    }
+                });
+                System.out.println("failed to fetch api");
+            }
 
-        } catch (MsalClientException e) {
-            Log.d(TAG, "MSAL Exception Generated while getting users: " + e.toString());
+        });
 
-        } catch (IndexOutOfBoundsException e) {
-            Log.d(TAG, "User at this position does not exist: " + e.toString());
-        }
+
+//        StringRequest stringRequest = new StringRequest(com.android.volley.Request.Method.POST, URLs.URL_ATTENDANCE_SUBMIT,
+//                new com.android.volley.Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//
+//                        if(!response.isEmpty()){
+//                            Dialog("Thank you "+ userName,"attendance taken successfully");
+//
+//                        }else{
+//                            Dialog("Error ","Error submitting the attendance");
+//
+//                        }
+//
+//                    }
+//                },
+//                new com.android.volley.Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+//                    }
+//                }) {
+//            @Override
+//            protected Map<String, String> getParams() throws AuthFailureError {
+//                // required parameters for the API
+//                Map<String, String> params = new HashMap<>();
+//                params.put("user_email", useremail);
+//                params.put("beacon_name", regionname);
+//                return params;
+//            }
+//
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                HashMap<String, String> headers = new HashMap<String, String>();
+//                headers.put("Content-Type", "application/json; charset=utf-8");
+//                headers.put("Authorization", "Bearer " + token);
+//                return headers;
+//            }
+//        };
+//        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
+    }
+
+    // checkBlock method to check the block title for user based on email and token
+    public void checkBlock(String useremail, String Token){
+
+        StringRequest stringRequest = new StringRequest(com.android.volley.Request.Method.GET, URLs.URL_BLOCKS+useremail,
+                new com.android.volley.Response.Listener<String>() {
+
+                    @Override
+                    public void onResponse(String response) {
+
+                        try {
+                            //converting string response to json object
+                            JSONObject obj = new JSONObject(response);
+                            blocTitle = obj.getString("block_title");
+
+                            Log.d(TAG, "checkBlock json respons respone is ======> " + obj);
+                            Log.d(TAG, "block title json respons respone is ======> " + blocTitle);
+
+                            bloctitle.setText(blocTitle);
+
+                            if(bloctitle.getText().toString().isEmpty()){
+
+
+                                //set title and message of dialog
+                                builder.setMessage("Please contact student affairs to assign block to you then reopen the app") .setTitle("No Block found");
+                                // dialog actions on YES
+                                builder.setCancelable(false)
+                                        .setPositiveButton("exit", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                finish();
+
+                                            }
+                                        });
+                                //Creating dialog box
+                                AlertDialog alert = builder.create();
+                                alert.show();
+
+                            }
+
+
+//                            //storing the user block title in shared preferences
+//                            Log.d(TAG, "SharedPrefManager block title respone iiiis ======> "
+//                                    + SharedPrefManager.getInstance(getApplicationContext()));
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new com.android.volley.Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Check for Internet Connection
+                        if (!Connection.InternetConnection(MainActivity.this)) {
+                            Connection.Dialog(MainActivity.this,"Please check your Internet Connection to use the App","No Internet Connection");
+
+                        }
+                        bloctitle.setText("Click to Refresh data");
+                        bloctitle.setOnClickListener(new OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                checkBlock(userEmail,token);
+                            }
+                        });
+                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json; charset=utf-8");
+                headers.put("Authorization", "Bearer " + Token);
+                return headers;
+            }
+        };
+
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    public void Dialog(String title , String message){
+
+        //set title and message of dialog
+        builder.setMessage(message) .setTitle(title);
+
+        // dialog actions on YES and NO
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        //Creating dialog box
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
 

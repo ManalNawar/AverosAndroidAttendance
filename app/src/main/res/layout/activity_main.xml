@@ -45,51 +45,61 @@
 <!--&lt;!&ndash;            android:entries="@array/scan_array" />&ndash;&gt;-->
 <!--    </RelativeLayout>-->
 
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:gravity="center"-->
-<!--        android:id="@+id/RSSILayout"-->
-<!--        android:layout_marginTop="10dp"-->
-<!--        android:orientation="horizontal" >-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:id="@+id/RSSILayout"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal" >
 
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:visibility="invisible"-->
-<!--            android:text="Min RSSI"/>-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:text="Min RSSI"/>
 
-<!--&lt;!&ndash;        <SeekBar&ndash;&gt;-->
-<!--&lt;!&ndash;            android:id="@+id/seekBar_rssi"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_width="0dp"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_weight="1"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:progressTint="@color/colorPrimary"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:progressBackgroundTint="@color/text_color"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:thumbTint="@color/colorPrimaryDark"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:visibility="invisible"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_height="wrap_content"/>&ndash;&gt;-->
-<!--&lt;!&ndash;        <TextView&ndash;&gt;-->
-<!--&lt;!&ndash;            android:id="@+id/seekbar_rssi_value"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_width="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_height="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_marginStart="5dp" />&ndash;&gt;-->
-<!--    </LinearLayout>-->
+        <SeekBar
+            android:id="@+id/seekBarrssi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:progressBackgroundTint="@color/text_color"
+            android:progressTint="@color/colorPrimary"
+            android:thumbTint="@color/colorPrimaryDark"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/seekbar_rssivalue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp" />
+    </LinearLayout>
 
 
     <TextView
         android:id="@+id/username"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
         android:layout_marginTop="20dp"
-        android:layout_marginLeft="10dp"
         android:textColor="@color/textcolor"
         android:textSize="30sp" />
 
     <TextView
         android:id="@+id/useremail"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginLeft="10dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:textColor="@color/textcolor"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/bloctitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
         android:textColor="@color/textcolor"
         android:textSize="20sp" />
 
@@ -97,42 +107,75 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:weightSum="5">
-        <ScrollView
+        android:weightSum="7">
+
+        <ImageView
+            android:id="@+id/imageview"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:background="@color/locationbg"
-            android:padding="5dp"
-            android:layout_marginTop="50dp"
-            android:layout_weight="3">
+            android:layout_height="343dp"
+            android:layout_marginTop="20dp"
+            android:src="@drawable/image_light">
+
+        </ImageView>
+
+<!--        <ScrollView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_marginTop="10dp"-->
+<!--            android:layout_weight="3"-->
+<!--            android:background="@color/locationbg"-->
+<!--            android:padding="5dp">-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/txtView"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textColor="@color/textcolor"-->
+<!--                android:textSize="16sp" />-->
+<!--        </ScrollView>-->
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:background="@color/cardcolor">
+        <TextView
+            android:text="Class"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/textcolor"
+            android:gravity="center"
+            android:textSize="20sp" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:background="@color/cardcolor"
+            app:tint="@color/textcolor"
+            app:srcCompat="@android:drawable/stat_notify_sync" />
+
             <TextView
+                android:id="@+id/classname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
                 android:textColor="@color/textcolor"
-                android:id="@+id/txtView"/>
-        </ScrollView>
+                android:gravity="center"
 
+                android:textSize="20sp" />
+        </LinearLayout>
 
-
-
-        <Button
-            android:id="@+id/btn"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="#FFFFFF"
-            android:textColor="#FFC300"
-            android:layout_gravity="center_horizontal"
-            android:visibility="invisible"
-            android:text="Start Scan"/>
 
         <Button
             android:id="@+id/attend"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="20dp"
             android:background="@color/cardcolor"
             android:text="Submit attendance"
             android:textColor="@color/textcolor"
@@ -148,6 +191,17 @@
             android:layout_gravity="center_horizontal"
             android:visibility="invisible"
             android:text="Attendance record"/>
+
+        <Button
+            android:id="@+id/btn"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="#FFFFFF"
+            android:text="Start Scan"
+            android:textColor="#FFC300"
+            android:visibility="invisible" />
+
 
 
 

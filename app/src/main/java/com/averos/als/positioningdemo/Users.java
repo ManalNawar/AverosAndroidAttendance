@@ -3,23 +3,26 @@ package com.averos.als.positioningdemo;
 public class Users {
     private String email,name,token;
 
+
 //    public Users(String string, String sharedPreferencesString, String preferencesString) {
 //    }
-    public Users(String name, String email, String token) {
+
+    public Users() {}
+    public Users(String name, String email,String token) {
         this.name = name;
         this.email = email;
         this.token = token;
     }
+
 
     public Users(String token) {
         this.token = token;
     }
 
 
+    public static Users bloktitle(String blockTitle) {
+        return new Users(blockTitle);
 
-    public Users(String name, String email) {
-        this.name = name;
-        this.email = email;
     }
 
     public String getEmail() {
@@ -40,9 +43,5 @@ public class Users {
 
     public String getToken() {
         return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 }

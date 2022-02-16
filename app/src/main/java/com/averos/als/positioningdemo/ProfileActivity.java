@@ -3,15 +3,16 @@ package com.averos.als.positioningdemo;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +46,9 @@ public class ProfileActivity extends AppCompatActivity {
     Button logout;
     Toolbar toolbar;
     AlertDialog.Builder builder;
-    SwitchCompat darkmode;
+    SwitchCompat switchc;
+
+    boolean isDarkMode;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -63,9 +66,15 @@ public class ProfileActivity extends AppCompatActivity {
 
         //toolbar
         toolbar = findViewById(R.id.main_toolbar);
+        //toolbar back button color change
+        Drawable backbt = getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24);
+        backbt.setColorFilter(getResources().getColor(R.color.textcolor), PorterDuff.Mode.SRC_ATOP);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Profile");
+        getSupportActionBar().setHomeAsUpIndicator(backbt);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,23 +93,37 @@ public class ProfileActivity extends AppCompatActivity {
         useremail = findViewById(R.id.useremail);
         useremail.setText("Email: "+userEmail);
 
-        darkmode = findViewById(R.id.darkmode);
+        switchc = findViewById(R.id.darkmode);
 
-                //if night mode is on switch is checked
-        if(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
-            darkmode.setChecked(true);
-        }else{
-            darkmode.setChecked(false);
+
+        // check the theme mode saved in shared preference.
+        isDarkMode = SharedPrefManager.getInstance(getApplicationContext()).isDarkMode();
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            switchc.setChecked(true);
         }
-        darkmode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            switchc.setChecked(false);
+        }
+
+        switchc.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean ischecked) {
-                if(ischecked){
-                    DarkModeOn();
-                }else{
-                    DarkModeOff();
-                }
 
+                if (ischecked) {
+
+                    // switch to dark theme
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    // save theme to shared preferences
+                    SharedPrefManager.getInstance(getApplicationContext()).setDarkthemeMode(true);
+                }
+                else {
+                    // switch to light theme
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    // save theme to shared preferences
+                    SharedPrefManager.getInstance(getApplicationContext()).setDarkthemeMode(false);
+                }
             }
         });
 
@@ -164,8 +187,8 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
 
-            Toast.makeText(getBaseContext(), "Signed Out!", Toast.LENGTH_SHORT)
-                    .show();
+//            Toast.makeText(getBaseContext(), "Signed Out!", Toast.LENGTH_SHORT)
+//                    .show();
 
         } catch (MsalClientException e) {
             System.out.print( "MSAL Exception Generated while getting users: " + e.toString());

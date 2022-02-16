@@ -10,6 +10,7 @@ public class SharedPrefManager {
     private static final String KEY_EMAIL = "email";
     private static final String KEY_NAME ="name";
     private static final String KEY_TOKEN ="token";
+    private  static final String isDarkMode = "isDarkMode";
 
     private static SharedPrefManager mInstance;
     private static Context mCtx;
@@ -33,7 +34,6 @@ public class SharedPrefManager {
         editor.putString(KEY_NAME, user.getName());
         editor.putString(KEY_EMAIL, user.getEmail());
         editor.putString(KEY_TOKEN, user.getToken());
-
         editor.apply();
     }
 
@@ -67,5 +67,22 @@ public class SharedPrefManager {
         editor.apply();
         mCtx.startActivity(new Intent(mCtx, LoginActivity.class));
     }
+
+    public  boolean setDarkthemeMode(boolean status){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME,Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(isDarkMode,status);
+        editor.apply();
+        return status;
+    }
+
+    public boolean isDarkMode(){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(isDarkMode,false);
+    }
+//    public  void getthemeMode(boolean isDarkMode){
+//        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME,Context.MODE_PRIVATE);
+//        sharedPreferences.getBoolean("isDarkMode",isDarkMode);
+//    }
 
 }
