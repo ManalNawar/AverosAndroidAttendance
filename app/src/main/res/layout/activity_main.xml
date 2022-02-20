@@ -45,36 +45,36 @@
 <!--&lt;!&ndash;            android:entries="@array/scan_array" />&ndash;&gt;-->
 <!--    </RelativeLayout>-->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:id="@+id/RSSILayout"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal" >
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:gravity="center"-->
+<!--        android:id="@+id/RSSILayout"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:orientation="horizontal" >-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            android:text="Min RSSI"/>
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:visibility="invisible"-->
+<!--            android:text="Min RSSI"/>-->
 
-        <SeekBar
-            android:id="@+id/seekBarrssi"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:progressBackgroundTint="@color/text_color"
-            android:progressTint="@color/colorPrimary"
-            android:thumbTint="@color/colorPrimaryDark"
-            android:visibility="visible" />
+<!--        <SeekBar-->
+<!--            android:id="@+id/seekBarrssi"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:progressBackgroundTint="@color/text_color"-->
+<!--            android:progressTint="@color/colorPrimary"-->
+<!--            android:thumbTint="@color/colorPrimaryDark"-->
+<!--            android:visibility="visible" />-->
 
-        <TextView
-            android:id="@+id/seekbar_rssivalue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp" />
-    </LinearLayout>
+<!--        <TextView-->
+<!--            android:id="@+id/seekbar_rssivalue"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="5dp" />-->
+<!--    </LinearLayout>-->
 
 
     <TextView

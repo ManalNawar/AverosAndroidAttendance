@@ -239,6 +239,7 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
         client = new AsyncHttpClient();
 
         alsManager = new ALSManager(MainActivity.this);
+        alsManager.setMinimumRSSI(-70);
 
 
 
@@ -329,29 +330,29 @@ public class MainActivity extends ALSActivity implements ALSPositionListener {
         setupBeaconListView();
 
 
-        TextView seekbarValue = findViewById(R.id.seekbar_rssivalue);
-        seekbarValue.setText("-120 dbm");
-        SeekBar rssiSeekbar = findViewById(R.id.seekBarrssi);
-        rssiSeekbar.setMax(120);
-        rssiSeekbar.setProgress(rssiSeekbar.getMax());
-        rssiSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
-                int value = (progress)*-1;
-                seekbarValue.setText(value+" dBm");
-                alsManager.setMinimumRSSI(value);
-            }
-        });
+//        TextView seekbarValue = findViewById(R.id.seekbar_rssivalue);
+//        seekbarValue.setText("-120 dbm");
+//        SeekBar rssiSeekbar = findViewById(R.id.seekBarrssi);
+//        rssiSeekbar.setMax(120);
+//        rssiSeekbar.setProgress(rssiSeekbar.getMax());
+//        rssiSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//                // TODO Auto-generated method stub
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//                // TODO Auto-generated method stub
+//            }
+//
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
+//                int value = (progress)*-1;
+//                seekbarValue.setText(value+" dBm");
+//                alsManager.setMinimumRSSI(value);
+//            }
+//        });
 
         scanButton.setOnClickListener(new OnClickListener() {
             @Override

@@ -99,10 +99,10 @@ public class LoginActivity extends AppCompatActivity {
 
         }
 
-        // location permission
-        if (!checkLocationPermission()) {
-        internetPermissionDialog("Location Should be turn on to use the App","Location turned off");
-        }
+//        // location permission
+//        if (!checkLocationPermission()) {
+//        internetPermissionDialog("Location Should be turn on to use the App","Location turned off");
+//        }
 
         //check if user is loggedin
         if (SharedPrefManager.getInstance(this).isLoggedIn()) {
@@ -131,16 +131,14 @@ public class LoginActivity extends AppCompatActivity {
         Intent myIntent = new Intent(this, MainActivity.class);
        // myIntent.putExtra("authResult", authResult.getUser().getName());
 
-
-
         callGraphButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!Connection.InternetConnection(LoginActivity.this)) {
                     Connection.Dialog(LoginActivity.this,"Please check your Internet Connection to use the App","No Internet Connection");
-                    // location permission
-                    if (!checkLocationPermission()) {
-                        internetPermissionDialog("Location Should be turn on to use the App","Location turned off");
-                    }
+//                    // location permission
+//                    if (!checkLocationPermission()) {
+//                        internetPermissionDialog("Location Should be turn on to use the App","Location turned off");
+//                    }
                 }else {
                     onCallGraphClicked();
                 }
@@ -669,16 +667,16 @@ public class LoginActivity extends AppCompatActivity {
         return connected;
     }
 
-    public boolean checkLocationPermission(){
-
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }else {
-            return false;
-        }
-
-    }
+//    public boolean checkLocationPermission(){
+//
+//        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED) {
+//            return true;
+//        }else {
+//            return false;
+//        }
+//
+//    }
 
     public void internetPermissionDialog(String message, String title){
 
