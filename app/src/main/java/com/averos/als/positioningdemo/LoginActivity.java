@@ -1,13 +1,23 @@
 package com.averos.als.positioningdemo;
-
+import android.Manifest;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -15,7 +25,11 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
@@ -24,15 +38,20 @@ import com.microsoft.identity.client.MsalServiceException;
 import com.microsoft.identity.client.MsalUiRequiredException;
 import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.User;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+
+import androidx.core.app.ActivityCompat;
+
+//import com.averos.als.positioningdemo.databinding.ActivityMainBinding;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -41,6 +60,8 @@ public class LoginActivity extends AppCompatActivity {
     final static String SCOPES [] = {"https://graph.microsoft.com/User.Read"};
     final static String MSGRAPH_URL = "https://graph.microsoft.com/v1.0/me";
 
+
+
     /* UI & Debugging Variables */
     private static final String TAG = LoginActivity.class.getSimpleName();
     Button callGraphButton;
@@ -48,34 +69,94 @@ public class LoginActivity extends AppCompatActivity {
     Button attendenceLog;
 
     /* Azure AD Variables */
-    private PublicClientApplication sampleApp;
-    private AuthenticationResult authResult;
+    public static PublicClientApplication sampleApp;
+    public static AuthenticationResult authResult;
 
     public static String userID;
+    String userName;
+    BottomNavigationView nav_bottom;
+    ImageView img;
+
+    List<User> users;
+    AlertDialog.Builder builder;
+    private ProgressDialog progressDialog;
+
+    Intent myIntent;
+    //Toolbar toolbar;
+    //LinearLayout beaconsUI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
 
+        builder = new AlertDialog.Builder(this);
+        progressDialog = new ProgressDialog(this);
+
+        // Check for Internet Connection
+        if (!Connection.InternetConnection(LoginActivity.this)) {
+            Connection.Dialog(LoginActivity.this,"Please check your Internet Connection to use the App","No Internet Connection");
+
+        }
+
+//        // location permission
+//        if (!checkLocationPermission()) {
+//        internetPermissionDialog("Location Should be turn on to use the App","Location turned off");
+//        }
+
+        //check if user is loggedin
+        if (SharedPrefManager.getInstance(this).isLoggedIn()) {
+            finish();
+            startActivity(new Intent(this, MainActivity.class));
+            Log.d(TAG, "user user is loggedin => : ");
+
+        }
+
+
+        ////////////////////////////tool bar ////////////////////////////////////
+       // toolbar = findViewById(R.id.main_toolbar);
+        //beaconsUI = findViewById(R.id.beaconsUI);
+        // providing title for the ActionBar
+       // toolbar.setVisibility(View.INVISIBLE);
+       // beaconsUI.setVisibility(View.INVISIBLE);
+
+
+
         callGraphButton = (Button) findViewById(R.id.callGraph);
-        signOutButton = (Button) findViewById(R.id.clearCache);
+        //signOutButton = (Button) findViewById(R.id.clearCache);
         attendenceLog = (Button) findViewById(R.id.submitattendance);
+       // nav_bottom = findViewById(R.id.bottomNavigationView);
+        img = findViewById(R.id.icon);
+        //Intent myIntent = new Intent(this, MainActivity.class);
         Intent myIntent = new Intent(this, MainActivity.class);
+       // myIntent.putExtra("authResult", authResult.getUser().getName());
+
         callGraphButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                onCallGraphClicked();
+                if (!Connection.InternetConnection(LoginActivity.this)) {
+                    Connection.Dialog(LoginActivity.this,"Please check your Internet Connection to use the App","No Internet Connection");
+//                    // location permission
+//                    if (!checkLocationPermission()) {
+//                        internetPermissionDialog("Location Should be turn on to use the App","Location turned off");
+//                    }
+                }else {
+                    onCallGraphClicked();
+                }
             }
         });
 
-        signOutButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                onSignOutClicked();
-            }
-        });
+//        signOutButton.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                onSignOutClicked();
+//            }
+//        });
 
         attendenceLog.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                ///////////////passing data to main activity//////////////////////
+                myIntent.putExtra("authResult", authResult.getUser().getName());
+                Log.d(TAG, "sampleApp contain this => : " + sampleApp);
+                myIntent.putExtra("sampleApp", String.valueOf(sampleApp));
                 startActivity(myIntent);
             }
         });
@@ -85,43 +166,90 @@ public class LoginActivity extends AppCompatActivity {
         if (sampleApp == null) {
             sampleApp = new PublicClientApplication(
                     this.getApplicationContext(),
-                    CLIENT_ID);
+                    URLs.CLIENT_ID);
         }
 
         /* Attempt to get a user and acquireTokenSilent
          * If this fails we do an interactive request
          */
-        List<User> users = null;
+        //List<User> users = null;
 
-        try {
-            users = sampleApp.getUsers();
+//        try {
+//            users = sampleApp.getUsers();
+//
+//            if (users != null && users.size() == 1) {
+//                /* We have 1 user */
+//
+//                sampleApp.acquireTokenSilentAsync(SCOPES, users.get(0), getAuthSilentCallback());
+//            } else {
+//                /* We have no user */
+//
+//                /* Let's do an interactive request */
+//                sampleApp.acquireToken(this, SCOPES, getAuthInteractiveCallback());
+//            }
+//        } catch (MsalClientException e) {
+//            Log.d(TAG, "MSAL Exception Generated while getting users: " + e.toString());
+//
+//        } catch (IndexOutOfBoundsException e) {
+//            Log.d(TAG, "User at this position does not exist: " + e.toString());
+//        }
 
-            if (users != null && users.size() == 1) {
-                /* We have 1 user */
-
-                sampleApp.acquireTokenSilentAsync(SCOPES, users.get(0), getAuthSilentCallback());
-            } else {
-                /* We have no user */
-
-                /* Let's do an interactive request */
-                sampleApp.acquireToken(this, SCOPES, getAuthInteractiveCallback());
-            }
-        } catch (MsalClientException e) {
-            Log.d(TAG, "MSAL Exception Generated while getting users: " + e.toString());
-
-        } catch (IndexOutOfBoundsException e) {
-            Log.d(TAG, "User at this position does not exist: " + e.toString());
+        // status bar color
+        if (Build.VERSION.SDK_INT >= 21) {
+            Window window = this.getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(this.getResources().getColor(R.color.border_color));
         }
+
+
+//// ...
+//
+//
+//// Instantiate the RequestQueue.
+//        RequestQueue queue = Volley.newRequestQueue(this);
+//        String url ="https://attend.itjed.com/api/token";
+//
+//// Request a string response from the provided URL.
+//        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        // Display the first 500 characters of the response string.
+//                        textView.setText("Response is: "+ response.substring(0,500));
+//                        Log.d(TAG, "Response is =======> " + authResult.getUser().getDisplayableId());
+//                        System.out.print("Response is =======> " + response);
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                textView.setText("That didn't work!");
+//            }
+//        }){
+//            protected Map<String, String> getparams(){
+//                Map<String,String> params = new HashMap<>();
+//                params.put("userEmail", authResult.getUser().getDisplayableId());
+//                params.put("apiAppKey", "3D3679B75DF6F1987AB688C3B4493A97B908FB3F454B36D93FCDDC2CEC34DE84");
+//                params.put("deviceID", "Attend's");
+//                return params;
+//            }
+//        };
+//
+//// Add the request to the RequestQueue.
+//        queue.add(stringRequest);
 
     }
 
-//
+
+    //
 // App callbacks for MSAL
 // ======================
 // getActivity() - returns activity so we can acquireToken within a callback
 // getAuthSilentCallback() - callback defined to handle acquireTokenSilent() case
 // getAuthInteractiveCallback() - callback defined to handle acquireToken() case
 //
+
+
 
     public AppCompatActivity getActivity() {
         return this;
@@ -141,11 +269,26 @@ public class LoginActivity extends AppCompatActivity {
                 /* Store the authResult */
                 authResult = authenticationResult;
 
+
+
+//                Toast.makeText(getBaseContext(), "Signed Out!", Toast.LENGTH_SHORT)
+//                        .show();
+//                System.out.print(authResult);
+
                 /* call graph */
                 callGraphAPI();
+                //login("yaho@yaho.com");
 
                 /* update the UI to post call Graph state */
                 updateSuccessUI();
+
+                //login(authResult.getUser().getDisplayableId());
+
+                //startActivity(myIntent);
+               // startActivity(new Intent(getActivity(),MainActivity.class));
+
+
+
             }
 
             @Override
@@ -181,14 +324,25 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d(TAG, "Successfully authenticated");
                 Log.d(TAG, "ID Token: " + authenticationResult.getIdToken());
 
+
                 /* Store the auth result */
                 authResult = authenticationResult;
-
+                Log.d(TAG, "auth user information string is "+authResult.toString());
+                Log.d(TAG, "auth user name information name is "+ authResult.getUser().getName());
+                Log.d(TAG, "auth user email information id is "+ authResult.getUser().getDisplayableId());
                 /* call Graph */
                 callGraphAPI();
 
                 /* update the UI to post call Graph state */
+                //login("yaho@yaho.com");
                 updateSuccessUI();
+                //login(authResult.getUser().getDisplayableId());
+                //startActivity(myIntent);
+              //  startActivity(new Intent(getActivity(),MainActivity.class));
+
+
+
+
 
 
 
@@ -216,12 +370,33 @@ public class LoginActivity extends AppCompatActivity {
 
     /* Set the UI for successful token acquisition data */
     private void updateSuccessUI() {
+
+        progressDialog.setTitle("Submitting...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+//        //check if user is loggedin
+//        if (SharedPrefManager.getInstance(this).isLoggedIn()) {
+//            finish();
+//            startActivity(new Intent(this, MainActivity.class));
+//            Log.d(TAG, "user user is loggedin => : ");
+//
+//        }
         callGraphButton.setVisibility(View.INVISIBLE);
-        signOutButton.setVisibility(View.VISIBLE);
-       attendenceLog.setVisibility(View.VISIBLE);
-        findViewById(R.id.welcome).setVisibility(View.VISIBLE);
-        ((TextView) findViewById(R.id.welcome)).setText("Welcome, " +
-                authResult.getUser().getName());
+        //signOutButton.setVisibility(View.VISIBLE);
+        attendenceLog.setVisibility(View.VISIBLE);
+        findViewById(R.id.welcometext).setVisibility(View.VISIBLE);
+        ((TextView) findViewById(R.id.welcometext)).setText("Thanks for Using the app\n"+
+                "in order to get the full advantage of the app you will need to turn on your internet, Bluetooth and location,\n"+
+                "through the app you can submit your attendance, view your attendance history");
+        //nav_bottom.setVisibility(View.VISIBLE);
+        img.setVisibility(View.INVISIBLE);
+
+//        toolbar.setVisibility(View.VISIBLE);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setTitle("Home");
+//
+//        beaconsUI.setVisibility(View.VISIBLE);
 
 
         //findViewById(R.id.graphData).setVisibility(View.VISIBLE);
@@ -232,7 +407,7 @@ public class LoginActivity extends AppCompatActivity {
      * Callback will call Graph api w/ access token & update UI
      */
     private void onCallGraphClicked() {
-        sampleApp.acquireToken(getActivity(), SCOPES, getAuthInteractiveCallback());
+        sampleApp.acquireToken(getActivity(), URLs.SCOPES, getAuthInteractiveCallback());
     }
 
     /* Handles the redirect from the System Browser */
@@ -257,7 +432,7 @@ public class LoginActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.d(TAG, "Failed to put parameters: " + e.toString());
         }
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, MSGRAPH_URL,
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, URLs.MSGRAPH_URL,
                 parameters,new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -265,10 +440,16 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d(TAG, "Response: " + response.toString());
                 try {
                     userID=response.getString("mail");
+                    userName = response.getString("displayName");
+                   //
+                     login(userID,userName);
+
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 updateGraphUI(response);
+               // login(userID);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -305,7 +486,7 @@ public class LoginActivity extends AppCompatActivity {
     private void onSignOutClicked() {
 
         /* Attempt to get a user and remove their cookies from cache */
-        List<User> users = null;
+       // List<User> users = null;
 
         try {
             users = sampleApp.getUsers();
@@ -341,12 +522,178 @@ public class LoginActivity extends AppCompatActivity {
     /* Set the UI for signed-out user */
     private void updateSignedOutUI() {
         callGraphButton.setVisibility(View.VISIBLE);
-        signOutButton.setVisibility(View.INVISIBLE);
+       // signOutButton.setVisibility(View.INVISIBLE);
         attendenceLog.setVisibility(View.INVISIBLE);
-        findViewById(R.id.welcome).setVisibility(View.INVISIBLE);
-       // findViewById(R.id.graphData).setVisibility(View.INVISIBLE);
+        //findViewById(R.id.welcome).setVisibility(View.INVISIBLE);
+        img.setVisibility(View.VISIBLE);
+//        toolbar.setVisibility(View.INVISIBLE);
+//        beaconsUI.setVisibility(View.INVISIBLE);
+        // findViewById(R.id.graphData).setVisibility(View.INVISIBLE);
         //((TextView) findViewById(R.id.graphData)).setText("No Data");
 
+    }
+
+
+    // login method inorder to store user email, name and token into shared preference
+    public void login(String userEmail,String userName){
+        //calling API for token
+        //user email and name already taken from msal API
+         StringRequest stringRequest = new StringRequest(Request.Method.POST, URLs.URL_TOKEN,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            //converting string response to json object
+                            JSONObject obj = new JSONObject(response);
+
+                            JSONObject jsondata = obj.getJSONObject("data");
+
+                            //if no error in response
+                            if (obj.getBoolean("success")) {
+
+                                progressDialog.dismiss();
+                              //  Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_SHORT).show();
+
+                                Log.d(TAG, "success json respons respone is ======> " + jsondata);
+
+
+                                //creating a new user object store email, name and token
+                                Users user = new Users(
+                                        userName,
+                                        userEmail,
+                                        jsondata.getString("token")
+                                );
+                                //storing the user email, name and token in shared preferences
+                                SharedPrefManager.getInstance(getApplicationContext()).userLogin(user);
+//                                Log.d(TAG, "SharedPrefManager email respone is ======> "
+//                                        + SharedPrefManager.getInstance(getApplicationContext()).getUser().getEmail());
+
+                                //checkBlock(userEmail,SharedPrefManager.getInstance(getApplicationContext()).getToken().getToken());
+
+//                                //starting the MainActivity activity
+//                                finish();
+//                                startActivity(myIntent);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "faild due to ======> "
+                                        + response);
+                                Log.d(TAG, "faild json respons respone is ======> " + response);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                // required parameters for the API
+                Map<String, String> params = new HashMap<>();
+                params.put("Content-Type", "application/json");
+                params.put("userEmail", userEmail);
+                params.put("apiAppKey", URLs.API_APP_KEY);
+                params.put("deviceID", "attend");
+                return params;
+            }
+        };
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+//    // checkBlock method to check the block title for user based on email and token
+//    public void checkBlock(String userEmail, String token){
+//
+//         StringRequest stringRequest = new StringRequest(Request.Method.GET, URLs.URL_BLOCKS+userEmail,
+//                new Response.Listener<String>() {
+//
+//                    @Override
+//                    public void onResponse(String response) {
+//
+//                        try {
+//                            //converting string response to json object
+//                            JSONObject obj = new JSONObject(response);
+//                            String blocktitle = obj.getString("block_title");
+//
+//                            Log.d(TAG, "checkBlock json respons respone is ======> " + obj);
+//                            Log.d(TAG, "block title json respons respone is ======> " + blocktitle);
+//
+//
+////                            //storing the user block title in shared preferences
+//
+//                            Log.d(TAG, "SharedPrefManager block title respone iiiis ======> "
+//                                        + SharedPrefManager.getInstance(getApplicationContext()));
+//
+//
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                },
+//                new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+//                    }
+//                }) {
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                HashMap<String, String> headers = new HashMap<String, String>();
+//                headers.put("Content-Type", "application/json; charset=utf-8");
+//                headers.put("Authorization", "Bearer " + token);
+//                return headers;
+//            }
+//        };
+//
+//         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+//    }
+
+    public boolean checkInternetConnection() {
+        boolean connected = false;
+        try {
+            ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo nInfo = cm.getActiveNetworkInfo();
+            connected = nInfo != null && nInfo.isAvailable() && nInfo.isConnected();
+
+
+            return connected;
+
+        } catch (Exception e) {
+            Log.e("Connectivity Exception", e.getMessage());
+        }
+        return connected;
+    }
+
+//    public boolean checkLocationPermission(){
+//
+//        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED) {
+//            return true;
+//        }else {
+//            return false;
+//        }
+//
+//    }
+
+    public void internetPermissionDialog(String message, String title){
+
+        //set title and message of dialog
+        builder.setMessage(message) .setTitle(title);
+
+        // dialog actions on YES and NO
+        builder.setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        //Creating dialog box
+        AlertDialog alert = builder.create();
+        //builder.setTitle("No Internet Connection");
+        alert.show();
     }
 
 }
